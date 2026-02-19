@@ -9,12 +9,12 @@ RUN apt-get update && \
 
 # Map Docker TARGETARCH to release asset names
 RUN case "${TARGETARCH}" in \
-      amd64) ASSET="tui-seanyang-me-linux-x64" ;; \
-      arm64) ASSET="tui-seanyang-me-linux-arm" ;; \
-      *)     echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
+    amd64) ASSET="tui-seanyang-me-linux-x64" ;; \
+    arm64) ASSET="tui-seanyang-me-linux-arm" ;; \
+    *)     echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
     esac && \
     curl -fsSL "https://github.com/aicheye/tui.seanyang.me/releases/download/${VERSION}/${ASSET}.zip" \
-         -o /tmp/release.zip && \
+    -o /tmp/release.zip && \
     unzip /tmp/release.zip -d /usr/local/bin && \
     chmod +x /usr/local/bin/tui-seanyang-me && \
     rm /tmp/release.zip
@@ -22,7 +22,6 @@ RUN case "${TARGETARCH}" in \
 RUN mkdir -p /data
 
 ENV SSH_ADDR=0.0.0.0:2222
-ENV SSH_HOST_KEY=/data/host_key
 ENV RUST_LOG=info
 
 EXPOSE 2222
