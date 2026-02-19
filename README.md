@@ -6,6 +6,8 @@ A personal portfolio and introduction, served over SSH as an interactive TUI.
 ssh tui.seanyang.me
 ```
 
+<img width="1772" height="1498" alt="image" src="https://github.com/user-attachments/assets/7f37730d-35fc-4366-aad1-225edb415c3e" />
+
 ## Deployment
 
 This guide covers hosting the TUI on a home server while keeping normal SSH access to the machine.
