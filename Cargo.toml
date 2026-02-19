@@ -2,6 +2,10 @@
 name = "ssh-seanyang-me"
 version = "0.1.0"
 edition = "2024"
+authors = ["Sean Yang <sean@seanyang.me>"]
+description = "SSH server for seanyang.me"
+license = "MIT"
+repository = "https://github.com/aicheye/ssh.seanyang.me"
 
 [[bin]]
 name = "ssh-seanyang-me"
