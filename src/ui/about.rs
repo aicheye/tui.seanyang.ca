@@ -89,7 +89,7 @@ fn render_song_card(f: &mut Frame, app: &App, area: Rect) {
         theme::divider("song recommendations", area.width),
         Line::from(""),
         Line::from(Span::styled(
-            song.desc.to_string(),
+            format!("♫⋆｡♪ ₊˚♬ ﾟ. {}  ♫ ⋆♪ ₊˚♬ ﾟ.", song.desc),
             Style::default()
                 .fg(theme::HI)
                 .add_modifier(Modifier::ITALIC),

@@ -1,0 +1,16 @@
+services:
+  ssh:
+    build:
+      context: .
+      args:
+        VERSION: v0.1.5
+    ports:
+      - "22:2222"
+    volumes:
+      - ssh-host-key:/data
+    environment:
+      - RUST_LOG=info
+    restart: unless-stopped
+
+volumes:
+  ssh-host-key:
