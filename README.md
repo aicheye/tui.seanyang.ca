@@ -50,34 +50,17 @@ Host home
 
 Now `ssh home` connects to your real shell.
 
-### 2. Build the Docker Image
+### 2. Start the Container
 
 ```bash
 git clone https://github.com/aicheye/tui.seanyang.me.git
 cd tui.seanyang.me
-docker build -t tui-seanyang-me .
+docker compose up -d --build
 ```
 
-For cross-platform builds (e.g. building for ARM on an x86 host):
+This builds the image and starts the container, mapping host port `22` → container port `2222`, so visitors running `ssh tui.seanyang.me` hit the TUI.
 
-```bash
-docker buildx build --platform linux/arm64 -t tui-seanyang-me .
-```
-
-### 3. Run the Container
-
-```bash
-docker run -d \
-  --name tui-seanyang-me \
-  --restart unless-stopped \
-  -p 22:2222 \
-  -v ssh-host-key:/data \
-  tui-seanyang-me
-```
-
-This maps host port `22` → container port `2222`, so visitors running `ssh tui.seanyang.me` hit the TUI.
-
-### 4. Verify
+### 3. Verify
 
 From another machine:
 
@@ -87,30 +70,6 @@ ssh tui.seanyang.me
 
 # Should open your real shell
 ssh -p 2200 tui.seanyang.me
-```
-
----
-
-## Docker Compose
-
-```yaml
-services:
-  ssh:
-    build: .
-    ports:
-      - "22:2222"
-    volumes:
-      - ssh-host-key:/data
-    environment:
-      - RUST_LOG=info
-    restart: unless-stopped
-
-volumes:
-  ssh-host-key:
-```
-
-```bash
-docker compose up -d
 ```
 
 ---
@@ -139,7 +98,7 @@ The host key lives at `/data/host_key` inside the container. The volume mount (`
 Download the latest binary from [GitHub Releases](https://github.com/aicheye/tui.seanyang.me/releases):
 
 ```bash
-curl -fsSL https://github.com/aicheye/tui.seanyang.me/releases/download/v0.1.1/tui-seanyang-me-linux-arm.zip \
+curl -fsSL https://github.com/aicheye/tui.seanyang.me/releases/download/v0.1.7/tui-seanyang-me-linux-x64.zip \
   -o tui-seanyang-me.zip
 unzip tui-seanyang-me.zip
 chmod +x tui-seanyang-me
