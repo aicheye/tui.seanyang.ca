@@ -15,7 +15,6 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
         .constraints([
             Constraint::Length(1), // top margin
             Constraint::Length(6), // song
-            Constraint::Length(1), // spacer
             Constraint::Min(1),    // about + poke
         ])
         .split(area);
@@ -29,7 +28,7 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
             Constraint::Length(2),
             Constraint::Percentage(44),
         ])
-        .split(rows[3]);
+        .split(rows[2]);
 
     render_about_card(f, cols[0]);
     render_poke_card(f, cols[2]);
@@ -45,6 +44,12 @@ fn render_about_card(f: &mut Frame, area: Rect) {
             "I believe in the power of technology to create positive change. I'm \
             passionate about using my skills to contribute to a more equitable \
             and sustainable future.",
+            theme::body(),
+        )),
+        Line::from(""),
+        Line::from(Span::styled(
+            "I'm always open to new opportunities, especially in non-profit or \
+            ESG sectors.",
             theme::body(),
         )),
         Line::from(""),
@@ -142,7 +147,7 @@ fn render_song_card(f: &mut Frame, app: &App, area: Rect) {
         )),
         Line::from(vec![
             Span::styled(format!("({index_label})  "), theme::secondary()),
-            Span::styled("h/l", theme::primary()),
+            Span::styled("←/→", theme::primary()),
             Span::styled(" prev/next", theme::secondary()),
         ]),
     ];

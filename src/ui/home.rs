@@ -132,7 +132,7 @@ fn render_quote(f: &mut Frame, app: &App, area: Rect) {
             Span::styled("— ", theme::secondary()),
             Span::styled(quote.author, theme::primary_bold()),
             Span::styled(format!("  ({index_label})  ",), theme::secondary()),
-            Span::styled("h/l", theme::primary()),
+            Span::styled("←/→", theme::primary()),
             Span::styled(" prev/next", theme::secondary()),
         ]),
     ];
