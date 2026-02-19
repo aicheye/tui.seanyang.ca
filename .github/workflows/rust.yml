@@ -23,23 +23,23 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            asset_name: crustty-linux-x64
-            binary_name: crustty
+            asset_name: ssh-seanyang-me-linux-x64
+            binary_name: ssh-seanyang-me
           - os: ubuntu-24.04-arm
-            asset_name: crustty-linux-arm
-            binary_name: crustty
+            asset_name: ssh-seanyang-me-linux-arm
+            binary_name: ssh-seanyang-me
           - os: windows-latest
-            asset_name: crustty-windows-x64
-            binary_name: crustty.exe
+            asset_name: ssh-seanyang-me-windows-x64
+            binary_name: ssh-seanyang-me.exe
           - os: windows-11-arm
-            asset_name: crustty-windows-arm
-            binary_name: crustty.exe
+            asset_name: ssh-seanyang-me-windows-arm
+            binary_name: ssh-seanyang-me.exe
           - os: macos-latest
-            asset_name: crustty-macos-arm
-            binary_name: crustty
+            asset_name: ssh-seanyang-me-macos-arm
+            binary_name: ssh-seanyang-me
           - os: macos-15-intel
-            asset_name: crustty-macos-x64
-            binary_name: crustty
+            asset_name: ssh-seanyang-me-macos-x64
+            binary_name: ssh-seanyang-me
 
     runs-on: ${{ matrix.os }}
 
@@ -73,7 +73,7 @@ jobs:
     - name: Download Artifacts
       uses: actions/download-artifact@v4
       with:
-        pattern: crustty-*
+        pattern: ssh-seanyang-me-*
         path: artifacts
         merge-multiple: true
 
