@@ -1,21 +1,21 @@
-# ssh.seanyang.me
+# tui.seanyang.me
 
 A personal portfolio and introduction, served over SSH as an interactive TUI.
 
 ```bash
-ssh ssh.seanyang.me
+ssh tui.seanyang.me
 ```
 
 ## Deployment
 
 This guide covers hosting the TUI on a home server while keeping normal SSH access to the machine.
 
-The idea: move your real SSH daemon to a non-standard port, then give port 22 to the TUI container so that `ssh ssh.seanyang.me` connects directly to it.
+The idea: move your real SSH daemon to a non-standard port, then give port 22 to the TUI container so that `ssh tui.seanyang.me` connects directly to it.
 
 ### Prerequisites
 
 - A machine with [Docker](https://docs.docker.com/get-docker/) installed
-- An A record for `ssh.seanyang.me` pointing to the machine's public IP
+- An A record for `tui.seanyang.me` pointing to the machine's public IP
 - Port 22 forwarded to the machine on your router
 
 ### 1. Move Your SSH Daemon Off Port 22
@@ -43,7 +43,7 @@ To make this convenient, add an entry to `~/.ssh/config` on your local machine:
 
 ```bash
 Host home
-    HostName ssh.seanyang.me
+    HostName tui.seanyang.me
     Port 2200
     User your-username
 ```
@@ -53,29 +53,29 @@ Now `ssh home` connects to your real shell.
 ### 2. Build the Docker Image
 
 ```bash
-git clone https://github.com/aicheye/ssh.seanyang.me.git
-cd ssh.seanyang.me
-docker build -t ssh-seanyang-me .
+git clone https://github.com/aicheye/tui.seanyang.me.git
+cd tui.seanyang.me
+docker build -t tui-seanyang-me .
 ```
 
 For cross-platform builds (e.g. building for ARM on an x86 host):
 
 ```bash
-docker buildx build --platform linux/arm64 -t ssh-seanyang-me .
+docker buildx build --platform linux/arm64 -t tui-seanyang-me .
 ```
 
 ### 3. Run the Container
 
 ```bash
 docker run -d \
-  --name ssh-seanyang-me \
+  --name tui-seanyang-me \
   --restart unless-stopped \
   -p 22:2222 \
   -v ssh-host-key:/data \
-  ssh-seanyang-me
+  tui-seanyang-me
 ```
 
-This maps host port `22` → container port `2222`, so visitors running `ssh ssh.seanyang.me` hit the TUI.
+This maps host port `22` → container port `2222`, so visitors running `ssh tui.seanyang.me` hit the TUI.
 
 ### 4. Verify
 
@@ -83,10 +83,10 @@ From another machine:
 
 ```bash
 # Should open the TUI
-ssh ssh.seanyang.me
+ssh tui.seanyang.me
 
 # Should open your real shell
-ssh -p 2200 ssh.seanyang.me
+ssh -p 2200 tui.seanyang.me
 ```
 
 ---
@@ -136,46 +136,46 @@ The host key lives at `/data/host_key` inside the container. The volume mount (`
 
 ## Host Deployment (without Docker)
 
-Download the latest binary from [GitHub Releases](https://github.com/aicheye/ssh.seanyang.me/releases):
+Download the latest binary from [GitHub Releases](https://github.com/aicheye/tui.seanyang.me/releases):
 
 ```bash
-curl -fsSL https://github.com/aicheye/ssh.seanyang.me/releases/download/v0.1.1/ssh-seanyang-me-linux-arm.zip \
-  -o ssh-seanyang-me.zip
-unzip ssh-seanyang-me.zip
-chmod +x ssh-seanyang-me
+curl -fsSL https://github.com/aicheye/tui.seanyang.me/releases/download/v0.1.1/tui-seanyang-me-linux-arm.zip \
+  -o tui-seanyang-me.zip
+unzip tui-seanyang-me.zip
+chmod +x tui-seanyang-me
 ```
 
 ### systemd Service
 
-Create `/etc/systemd/system/ssh-seanyang-me.service`:
+Create `/etc/systemd/system/tui-seanyang-me.service`:
 
 ```ini
 [Unit]
-Description=ssh.seanyang.me SSH TUI server
+Description=tui.seanyang.me SSH TUI server
 After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/ssh-seanyang-me
+ExecStart=/usr/local/bin/tui-seanyang-me
 Environment=SSH_ADDR=0.0.0.0:22
-Environment=SSH_HOST_KEY=/var/lib/ssh-seanyang-me/host_key
+Environment=SSH_HOST_KEY=/var/lib/tui-seanyang-me/host_key
 Environment=RUST_LOG=info
 Restart=on-failure
 RestartSec=5
 
 NoNewPrivileges=true
 ProtectSystem=strict
-ReadWritePaths=/var/lib/ssh-seanyang-me
+ReadWritePaths=/var/lib/tui-seanyang-me
 
 [Install]
 WantedBy=multi-user.target
 ```
 
 ```bash
-sudo mkdir -p /var/lib/ssh-seanyang-me
-sudo cp ssh-seanyang-me /usr/local/bin/
+sudo mkdir -p /var/lib/tui-seanyang-me
+sudo cp tui-seanyang-me /usr/local/bin/
 sudo systemctl daemon-reload
-sudo systemctl enable --now ssh-seanyang-me
+sudo systemctl enable --now tui-seanyang-me
 ```
 
 ---
