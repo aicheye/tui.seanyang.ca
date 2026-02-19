@@ -60,24 +60,68 @@ fn render_about_card(f: &mut Frame, area: Rect) {
         )),
         Line::from(""),
     ];
-    text.push(fact("Hometown", "Toronto"));
-    text.push(fact("Pets", "2 dogs"));
-    text.push(fact(
+    text.extend(fact("Hometown", "Toronto", area.width));
+    text.extend(fact("Pets", "2 dogs", area.width));
+    text.extend(fact(
         "Fav Games",
         "Subway Builder, Cities Skylines II, Minecraft",
+        area.width,
     ));
-    text.push(fact("Fav Artists", "beabadoobee, Laufey, keshi"));
-    text.push(fact("Dream Location", "The Moon"));
+    text.extend(fact(
+        "Fav Artists",
+        "beabadoobee, Laufey, keshi",
+        area.width,
+    ));
+    text.extend(fact("Dream Location", "The Moon", area.width));
 
-    let p = Paragraph::new(text).wrap(Wrap { trim: true });
+    let p = Paragraph::new(text).wrap(Wrap { trim: false });
     f.render_widget(p, area);
 }
 
-fn fact(key: &'static str, value: &'static str) -> Line<'static> {
-    Line::from(vec![
-        Span::styled(format!("{key:<16}"), theme::secondary()),
-        Span::styled(value, theme::body()),
-    ])
+fn fact(key: &'static str, value: &'static str, col_width: u16) -> Vec<Line<'static>> {
+    const KEY_WIDTH: usize = 16;
+    let val_width = (col_width as usize).saturating_sub(KEY_WIDTH);
+
+    let dots = ".".repeat(KEY_WIDTH.saturating_sub(key.len()));
+    let key_label = format!("{key}{dots}");
+
+    if val_width == 0 || value.len() <= val_width {
+        return vec![Line::from(vec![
+            Span::styled(key_label, theme::secondary()),
+            Span::styled(value, theme::body()),
+        ])];
+    }
+
+    let mut lines = Vec::new();
+    let mut remaining = value;
+    let mut first = true;
+
+    while !remaining.is_empty() {
+        let chunk = if remaining.len() <= val_width {
+            remaining
+        } else {
+            match remaining[..val_width].rfind(' ') {
+                Some(i) => &remaining[..i],
+                None => &remaining[..val_width],
+            }
+        };
+
+        let key_span = if first {
+            Span::styled(key_label.clone(), theme::secondary())
+        } else {
+            Span::raw("                ") // 16 spaces
+        };
+
+        lines.push(Line::from(vec![
+            key_span,
+            Span::styled(chunk, theme::body()),
+        ]));
+
+        remaining = remaining[chunk.len()..].trim_start_matches(' ');
+        first = false;
+    }
+
+    lines
 }
 
 fn render_song_card(f: &mut Frame, app: &App, area: Rect) {

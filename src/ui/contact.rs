@@ -72,7 +72,10 @@ fn render_socials(f: &mut Frame, area: Rect) {
     let mut lines: Vec<ListItem> = Vec::new();
 
     // Divider as first item
-    lines.push(ListItem::new(theme::divider("socials", area.width)));
+    lines.push(ListItem::new(vec![
+        theme::divider("socials", area.width),
+        Line::from(""),
+    ]));
 
     for s in SOCIALS.iter() {
         lines.push(ListItem::new(vec![
