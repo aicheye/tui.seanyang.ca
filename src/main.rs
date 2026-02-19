@@ -23,10 +23,13 @@ async fn main() -> Result<()> {
         .unwrap_or_else(|_| "0.0.0.0:2222".to_string())
         .parse()?;
 
-    let key_path =
-        PathBuf::from(std::env::var("SSH_HOST_KEY").unwrap_or_else(|_| "host_key".to_string()));
-
-    let key = server::load_or_generate_host_key(&key_path).await?;
+    let key = if let Ok(key_data) = std::env::var("SSH_HOST_KEY_DATA") {
+        server::decode_host_key(&key_data)?
+    } else {
+        let key_path =
+            PathBuf::from(std::env::var("SSH_HOST_KEY").unwrap_or_else(|_| "host_key".to_string()));
+        server::load_or_generate_host_key(&key_path).await?
+    };
 
     server::run(addr, key).await
 }

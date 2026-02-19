@@ -225,6 +225,13 @@ impl server::Handler for Client {
 // Key management
 // ---------------------------------------------------------------------------
 
+/// Decode an Ed25519 host key from a PEM string (e.g. from an env var).
+pub fn decode_host_key(pem: &str) -> Result<KeyPair> {
+    let kp = russh_keys::decode_secret_key(pem, None)?;
+    info!("Loaded host key from environment variable");
+    Ok(kp)
+}
+
 /// Load an Ed25519 host key from `path`, or generate (and save) a new one.
 pub async fn load_or_generate_host_key(path: &std::path::Path) -> Result<KeyPair> {
     if path.exists() {
