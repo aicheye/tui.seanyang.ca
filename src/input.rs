@@ -10,6 +10,7 @@ pub enum Key {
     Backspace,
     Escape,
     Tab,
+    BackTab,
     Home,
     End,
     PageUp,
@@ -69,6 +70,7 @@ pub fn parse_keys(bytes: &[u8]) -> Vec<Key> {
                         (b"", Some(b'F')) | (b"4", Some(b'~')) => Some(Key::End),
                         (b"5", Some(b'~')) => Some(Key::PageUp),
                         (b"6", Some(b'~')) => Some(Key::PageDown),
+                        (b"", Some(b'Z')) => Some(Key::BackTab), // Shift+Tab
                         _ => None,
                     };
                     i = seq_end;

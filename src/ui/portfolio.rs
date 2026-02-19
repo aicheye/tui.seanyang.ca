@@ -10,6 +10,14 @@ use super::theme;
 use crate::{app::App, data::portfolio::PROJECTS};
 
 pub fn render(f: &mut Frame, app: &App, area: Rect) {
+    let rows = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length(1), // top margin
+            Constraint::Min(1),    // content
+        ])
+        .split(area);
+
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
@@ -17,7 +25,7 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
             Constraint::Length(2),
             Constraint::Percentage(59),
         ])
-        .split(area);
+        .split(rows[1]);
 
     render_list(f, app, chunks[0]);
     render_preview(f, app, chunks[2]);

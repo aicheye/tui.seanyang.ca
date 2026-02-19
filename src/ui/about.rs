@@ -13,12 +13,14 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
     let rows = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
+            Constraint::Length(1), // top margin
             Constraint::Length(6), // song
+            Constraint::Length(1), // spacer
             Constraint::Min(1),    // about + poke
         ])
         .split(area);
 
-    render_song_card(f, app, rows[0]);
+    render_song_card(f, app, rows[1]);
 
     let cols = Layout::default()
         .direction(Direction::Horizontal)
@@ -27,7 +29,7 @@ pub fn render(f: &mut Frame, app: &App, area: Rect) {
             Constraint::Length(2),
             Constraint::Percentage(44),
         ])
-        .split(rows[1]);
+        .split(rows[3]);
 
     render_about_card(f, cols[0]);
     render_poke_card(f, cols[2]);
@@ -43,12 +45,6 @@ fn render_about_card(f: &mut Frame, area: Rect) {
             "I believe in the power of technology to create positive change. I'm \
             passionate about using my skills to contribute to a more equitable \
             and sustainable future.",
-            theme::body(),
-        )),
-        Line::from(""),
-        Line::from(Span::styled(
-            "I'm always open to new opportunities, especially in non-profit or \
-            ESG sectors.",
             theme::body(),
         )),
         Line::from(""),

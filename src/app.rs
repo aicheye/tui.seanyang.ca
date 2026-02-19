@@ -123,6 +123,15 @@ impl App {
                 self.section = Section::ALL[next].clone();
                 return true;
             }
+            Key::BackTab => {
+                let prev = self
+                    .section
+                    .index()
+                    .checked_sub(1)
+                    .unwrap_or(Section::ALL.len() - 1);
+                self.section = Section::ALL[prev].clone();
+                return true;
+            }
             _ => {}
         }
 

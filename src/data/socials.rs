@@ -38,19 +38,3 @@ pub const SOCIALS: &[Social] = &[
 ];
 
 pub const PRIMARY_EMAIL: &str = "sean@seanyang.me";
-
-pub struct Building {
-    pub name: &'static str,
-    pub description: &'static str,
-}
-
-pub const BUILDING: &[Building] = &[
-    Building {
-        name: "Watonomous",
-        description: "Rapid-inference motion prediction models for autonomous vehicles",
-    },
-    Building {
-        name: "EZP2P Arcade",
-        description: "Peer-to-peer gaming platform",
-    },
-];

@@ -10,14 +10,22 @@ use super::theme;
 use crate::{app::App, data::socials::SOCIALS};
 
 pub fn render(f: &mut Frame, _app: &App, area: Rect) {
+    let rows = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length(1), // top margin
+            Constraint::Min(1),    // content
+        ])
+        .split(area);
+
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
             Constraint::Percentage(44),
             Constraint::Length(2),
-            Constraint::Percentage(54),
+            Constraint::Percentage(56),
         ])
-        .split(area);
+        .split(rows[1]);
 
     render_blurb(f, chunks[0]);
     render_socials(f, chunks[2]);
@@ -36,8 +44,8 @@ fn render_blurb(f: &mut Frame, area: Rect) {
         )),
         Line::from(""),
         Line::from(Span::styled(
-            "For professional enquiries, LinkedIn works best — \
-             or fire off an email if you prefer.",
+            "For professional enquiries, LinkedIn works best, \
+            or shoot me an email if you prefer.",
             theme::body(),
         )),
         Line::from(""),
@@ -48,19 +56,23 @@ fn render_blurb(f: &mut Frame, area: Rect) {
         Line::from(""),
         Line::from(vec![
             Span::styled("  · ", theme::primary()),
-            Span::styled("Software projects & collaboration", theme::body()),
+            Span::styled("Software projects", theme::body()),
         ]),
         Line::from(vec![
             Span::styled("  · ", theme::primary()),
-            Span::styled("Internship / co-op opportunities", theme::body()),
+            Span::styled("Internship opportunities", theme::body()),
         ]),
         Line::from(vec![
             Span::styled("  · ", theme::primary()),
-            Span::styled("Urbanism, transit, city design", theme::body()),
+            Span::styled("Urbanism, transit, cities ", theme::body()),
         ]),
         Line::from(vec![
             Span::styled("  · ", theme::primary()),
             Span::styled("Music recommendations", theme::body()),
+        ]),
+        Line::from(vec![
+            Span::styled("  · ", theme::primary()),
+            Span::styled("Films", theme::body()),
         ]),
     ];
 

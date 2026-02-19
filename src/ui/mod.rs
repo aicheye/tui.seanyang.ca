@@ -7,7 +7,7 @@ pub mod theme;
 use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout, Rect},
-    style::Modifier,
+    style::{Color, Modifier, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph, Tabs},
 };
@@ -19,18 +19,31 @@ use crate::app::{App, Section};
 pub fn render(f: &mut Frame, app: &App) {
     let area = f.area();
 
+    // Constrain and centre the entire chrome within configurable bounds.
+    let max_width: u16 = 80;
+    let min_width: u16 = 60;
+    let max_height: u16 = 40;
+
+    let width = area.width.min(max_width).max(min_width);
+    let height = area.height.min(max_height);
+    let x = area.x + (area.width.saturating_sub(width)) / 2;
+    let y = area.y + (area.height.saturating_sub(height)) / 2;
+    let padded = Rect::new(x, y, width.min(area.width), height.min(area.height));
+
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
+            Constraint::Length(4), // top padding
             Constraint::Length(3), // nav bar (tabs + border)
             Constraint::Min(1),    // section content
             Constraint::Length(1), // footer
+            Constraint::Length(4), // bottom padding
         ])
-        .split(area);
+        .split(padded);
 
-    render_nav(f, app, chunks[0]);
-    render_section(f, app, chunks[1]);
-    render_footer(f, app, chunks[2]);
+    render_nav(f, app, chunks[1]);
+    render_section(f, app, chunks[2]);
+    render_footer(f, app, chunks[3]);
 }
 
 // ---------------------------------------------------------------------------
@@ -90,16 +103,33 @@ fn render_nav(f: &mut Frame, app: &App, area: Rect) {
 }
 
 fn render_footer(f: &mut Frame, _app: &App, area: Rect) {
-    let text = Line::from(vec![
-        Span::styled("tab", theme::primary()),
-        Span::styled(" next  ", theme::secondary()),
-        Span::styled("1-4", theme::primary()),
-        Span::styled(" jump  ", theme::secondary()),
-        Span::styled("q", theme::primary()),
-        Span::styled(" quit", theme::secondary()),
-    ]);
-    let footer = Paragraph::new(text);
-    f.render_widget(footer, area);
+    let bg = Color::Rgb(0x26, 0x32, 0x44);
+    let key = Style::default()
+        .fg(theme::PRIMARY)
+        .bg(bg)
+        .add_modifier(Modifier::BOLD);
+    let label = Style::default().fg(theme::HI).bg(bg);
+
+    // " q quit " = 8 chars
+    let bar_width: u16 = 8;
+
+    let cols = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Fill(1),
+            Constraint::Length(bar_width.min(area.width)),
+        ])
+        .split(area);
+
+    let made_with = Line::from(vec![Span::styled(
+        "Made with ❤︎  in Rust",
+        theme::secondary(),
+    )]);
+    f.render_widget(Paragraph::new(made_with), cols[0]);
+
+    let text = Line::from(vec![Span::styled(" q", key), Span::styled(" quit ", label)]);
+    let footer = Paragraph::new(text).style(Style::default().bg(bg));
+    f.render_widget(footer, cols[1]);
 }
 
 // ---------------------------------------------------------------------------
@@ -107,29 +137,10 @@ fn render_footer(f: &mut Frame, _app: &App, area: Rect) {
 // ---------------------------------------------------------------------------
 
 fn render_section(f: &mut Frame, app: &App, area: Rect) {
-    let inner = centered_rect(area, 100, 32, 60, 20);
-
     match &app.section {
-        Section::Home => home::render(f, app, inner),
-        Section::About => about::render(f, app, inner),
-        Section::Portfolio => portfolio::render(f, app, inner),
-        Section::Contact => contact::render(f, app, inner),
+        Section::Home => home::render(f, app, area),
+        Section::About => about::render(f, app, area),
+        Section::Portfolio => portfolio::render(f, app, area),
+        Section::Contact => contact::render(f, app, area),
     }
-}
-
-/// Returns a centered Rect with max width/height, enforcing minimums.
-fn centered_rect(
-    area: Rect,
-    max_width: u16,
-    max_height: u16,
-    min_width: u16,
-    min_height: u16,
-) -> Rect {
-    let width = area.width.min(max_width).max(min_width);
-    let height = area.height.min(max_height).max(min_height);
-
-    let x = area.x + (area.width.saturating_sub(width)) / 2;
-    let y = area.y + (area.height.saturating_sub(height)) / 2;
-
-    Rect::new(x, y, width.min(area.width), height.min(area.height))
 }

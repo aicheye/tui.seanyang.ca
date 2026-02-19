@@ -97,7 +97,7 @@ pub const PROJECTS: &[Project] = &[
         github: Some("https://github.com/aicheye/ezp2p"),
     },
     Project {
-        title: "aicheye's Combat Tagging",
+        title: "Combat Tag",
         year: 2024,
         category: "Minecraft Mod",
         description: "Fair PvP Minecraft mod with 870+ downloads on Modrinth.",
@@ -148,23 +148,6 @@ pub const PROJECTS: &[Project] = &[
         github: Some("https://github.com/aicheye/quoridor"),
     },
     Project {
-        title: "Community Centre Manager",
-        year: 2022,
-        category: "Management System",
-        description: "System for managing events, member billing, and staff payrolls.",
-        long_description: "A Java application for managing a community centre's operations: scheduling \
-                           events, tracking member registrations and billing cycles, and processing staff \
-                           payroll.",
-        languages: &["Java"],
-        features: &[
-            "Event management",
-            "Member billing",
-            "Staff payroll",
-            "SQLite database",
-        ],
-        github: Some("https://github.com/PAGELINE123/CommunityCentreManager"),
-    },
-    Project {
         title: "Chess in Python",
         year: 2021,
         category: "Game",
@@ -182,3 +165,13 @@ pub const PROJECTS: &[Project] = &[
         github: Some("https://github.com/aicheye/chess"),
     },
 ];
+
+pub struct Building {
+    pub name: &'static str,
+    pub description: &'static str,
+}
+
+pub const BUILDING: &[Building] = &[Building {
+    name: "Watonomous",
+    description: "Rapid-inference motion prediction models for autonomous vehicles",
+}];
