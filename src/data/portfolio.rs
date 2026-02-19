@@ -17,7 +17,7 @@ pub const PROJECTS: &[Project] = &[
         description: "Custom C interpreter with step-through debugger TUI built with Rust and Ratatui.",
         long_description: "CRusTTY is a from-scratch C language interpreter paired with an interactive \
                            step-through debugger rendered entirely in the terminal using Ratatui. It lets \
-                           you pause execution at any point, inspect memory, and trace variable state — \
+                           you pause execution at any point, inspect memory, and trace variable state\
                            all without leaving the terminal.",
         languages: &["Rust"],
         features: &[
@@ -43,16 +43,16 @@ pub const PROJECTS: &[Project] = &[
             "Top 5% ranking",
             "PyTorch",
         ],
-        github: None,
+        github: Some("https://github.com/aicheye/wundernn"),
     },
     Project {
         title: "Bucket",
         year: 2025,
         category: "Web Application",
-        description: "All-in-one student dashboard for Waterloo students with real-time data.",
+        description: "All-in-one student dashboard for Waterloo students.",
         long_description: "Bucket is a unified dashboard for University of Waterloo students, aggregating \
-                           timetables, grades, deadlines, and campus events in one place. Built with \
-                           TypeScript and Hasura GraphQL for real-time updates.",
+                           timetables, grades, deadlines in one place. Built with TypeScript and Hasura \
+                           GraphQL for real-time updates.",
         languages: &["TypeScript", "JavaScript"],
         features: &[
             "Student dashboard",
@@ -77,13 +77,13 @@ pub const PROJECTS: &[Project] = &[
             "Real-time messaging",
             "Android native",
         ],
-        github: Some("https://github.com/aicheye/campusyap"),
+        github: Some("https://github.com/aicheye/project_team_23"),
     },
     Project {
         title: "EZP2P Arcade",
         year: 2024,
         category: "Gaming Platform",
-        description: "Peer-to-peer gaming platform with classic games — no server required.",
+        description: "Peer-to-peer gaming platform with classic games: no server required.",
         long_description: "EZP2P Arcade uses WebRTC to connect players directly, eliminating the need for \
                            a game server. Multiple classic games are playable with anyone who has a browser, \
                            over a direct peer connection.",
@@ -94,7 +94,7 @@ pub const PROJECTS: &[Project] = &[
             "No server required",
             "Shareable room links",
         ],
-        github: Some("https://github.com/aicheye/ezp2p-arcade"),
+        github: Some("https://github.com/aicheye/ezp2p"),
     },
     Project {
         title: "aicheye's Combat Tagging",
@@ -111,7 +111,7 @@ pub const PROJECTS: &[Project] = &[
             "Performance optimized",
             "870+ downloads",
         ],
-        github: Some("https://github.com/aicheye/combat-tagging"),
+        github: Some("https://github.com/aicheye/combat-tag"),
     },
     Project {
         title: "seanyang.me",
@@ -154,7 +154,7 @@ pub const PROJECTS: &[Project] = &[
         description: "System for managing events, member billing, and staff payrolls.",
         long_description: "A Java application for managing a community centre's operations: scheduling \
                            events, tracking member registrations and billing cycles, and processing staff \
-                           payroll — all backed by a local SQLite database.",
+                           payroll.",
         languages: &["Java"],
         features: &[
             "Event management",
@@ -162,7 +162,7 @@ pub const PROJECTS: &[Project] = &[
             "Staff payroll",
             "SQLite database",
         ],
-        github: None,
+        github: Some("https://github.com/PAGELINE123/CommunityCentreManager"),
     },
     Project {
         title: "Chess in Python",
