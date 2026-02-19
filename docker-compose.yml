@@ -3,7 +3,7 @@ services:
     build:
       context: .
       args:
-        VERSION: v0.2.1
+        VERSION: v0.2.2
     ports:
       - "22:2222"
     volumes:

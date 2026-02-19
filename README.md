@@ -3,6 +3,7 @@
 A personal portfolio and introduction, served over SSH as an interactive TUI.
 
 ```bash
+ssh seanyang.me
 ssh tui.seanyang.me
 ```
 

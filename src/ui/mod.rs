@@ -80,7 +80,7 @@ fn render_nav(f: &mut Frame, app: &App, area: Rect) {
     let block = Block::default()
         .borders(Borders::ALL)
         .border_style(theme::secondary())
-        .title(Span::styled(" tui.seanyang.me ", theme::primary()));
+        .title(Span::styled(" seanyang.me ", theme::primary()));
 
     let tabs = Tabs::new(tab_titles)
         .block(block)
