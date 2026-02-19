@@ -6,7 +6,7 @@ A personal portfolio and introduction, served over SSH as an interactive TUI.
 ssh tui.seanyang.me
 ```
 
-<img width="1772" height="1498" alt="image" src="https://github.com/user-attachments/assets/7f37730d-35fc-4366-aad1-225edb415c3e" />
+<img width="2486" height="1884" alt="image" src="https://github.com/user-attachments/assets/d252f450-5ae2-49f1-936e-b4e53b2fa505" />
 
 ## Deployment
 
