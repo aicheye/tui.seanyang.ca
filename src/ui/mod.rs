@@ -6,7 +6,7 @@ pub mod theme;
 
 use ratatui::{
     Frame,
-    layout::{Alignment, Constraint, Direction, Layout, Rect},
+    layout::{Constraint, Direction, Layout, Rect},
     style::Modifier,
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph, Tabs},
@@ -52,10 +52,16 @@ fn render_nav(f: &mut Frame, app: &App, area: Rect) {
 
     // "1 Home · 2 About · 3 Portfolio · 4 Contact" + borders + padding
     let tab_box_width = 52u16.min(area.width);
+    let resume_url = "https://seanyang.me/resume";
+    let resume_box_width = (resume_url.len() as u16).min(area.width);
 
     let cols = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints([Constraint::Length(tab_box_width), Constraint::Min(1)])
+        .constraints([
+            Constraint::Length(tab_box_width),
+            Constraint::Min(1),
+            Constraint::Length(resume_box_width),
+        ])
         .split(area);
 
     let block = Block::default()
@@ -72,14 +78,15 @@ fn render_nav(f: &mut Frame, app: &App, area: Rect) {
 
     f.render_widget(tabs, cols[0]);
 
-    // Resume link, vertically centered in the nav row (line 2 of 3)
+    let resume_rows = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Length(1), Constraint::Min(1)])
+        .split(cols[2]);
     let resume = Paragraph::new(Line::from(vec![Span::styled(
-        "https://seanyang.me/resume",
-        theme::primary().add_modifier(Modifier::UNDERLINED),
-    )]))
-    .alignment(Alignment::Right);
-    let resume_area = Rect::new(cols[1].x, cols[1].y + 1, cols[1].width, 1);
-    f.render_widget(resume, resume_area);
+        resume_url,
+        theme::secondary().add_modifier(Modifier::UNDERLINED),
+    )]));
+    f.render_widget(resume, resume_rows[1]);
 }
 
 fn render_footer(f: &mut Frame, _app: &App, area: Rect) {

@@ -3,13 +3,14 @@ services:
     build:
       context: .
       args:
-        VERSION: v0.1.6
+        VERSION: v0.1.7
     ports:
       - "22:2222"
     volumes:
       - ssh-host-key:/data
     environment:
       - RUST_LOG=info
+      - SSH_HOST_KEY=/data/host_key
     restart: unless-stopped
 
 volumes:
