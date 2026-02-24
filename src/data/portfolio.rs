@@ -19,7 +19,7 @@ pub const PROJECTS: &[Project] = &[
                            step-through debugger rendered entirely in the terminal using Ratatui. It lets \
                            you pause execution at any point, inspect memory, and trace variable state\
                            all without leaving the terminal.",
-        languages: &["Rust"],
+        languages: &["Rust", "C"],
         features: &[
             "C language interpreter",
             "Step-through debugging",
@@ -121,7 +121,7 @@ pub const PROJECTS: &[Project] = &[
         long_description: "The website you're (sort of) looking at right now. Built with Next.js 15 and \
                            React 19 for the frontend, Tailwind CSS v4 for styling, and a Python/Flask \
                            backend powering the poke API.",
-        languages: &["JavaScript", "Python"],
+        languages: &["JavaScript", "React", "Python"],
         features: &[
             "Next.js 15 + React 19",
             "Tailwind CSS v4",
