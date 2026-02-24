@@ -10,7 +10,7 @@ use std::io::{self, Write};
 
 use crossterm::{
     QueueableCommand, cursor,
-    style::{self, Attribute, Attributes, Color, Colors},
+    style::{self, Attribute, Attributes, Color, Colors, SetAttribute},
     terminal,
 };
 use ratatui::{
@@ -106,7 +106,7 @@ impl Backend for SshBackend {
     {
         let mut prev_fg = RColor::Reset;
         let mut prev_bg = RColor::Reset;
-        let mut prev_mods: Option<Modifier> = None;
+        let mut prev_mods = Modifier::empty();
 
         for (x, y, cell) in content {
             // Move cursor
@@ -114,26 +114,19 @@ impl Backend for SshBackend {
                 .queue(cursor::MoveTo(x, y))
                 .map_err(io::Error::other)?;
 
-            // Update colors if changed
-            if cell.fg != prev_fg || cell.bg != prev_bg {
-                self.writer
-                    .queue(style::SetColors(Colors::new(
-                        Self::map_color(cell.fg),
-                        Self::map_color(cell.bg),
-                    )))
-                    .map_err(io::Error::other)?;
-                prev_fg = cell.fg;
-                prev_bg = cell.bg;
-            }
+            let mods_changed = cell.modifier != prev_mods;
+            let colors_changed = cell.fg != prev_fg || cell.bg != prev_bg;
 
-            // Update modifiers if changed
-            if Some(cell.modifier) != prev_mods {
-                // Send ANSI reset (SGR 0) to clear ALL attributes
+            // When modifiers change we must reset first, then re-apply
+            // everything atomically (no intermediate state for the terminal
+            // to render if a packet boundary lands here).
+            if mods_changed {
                 self.writer
-                    .queue(style::Print("\x1b[0m"))
+                    .queue(SetAttribute(Attribute::Reset))
                     .map_err(io::Error::other)?;
 
-                // Restore colors after reset
+                // Colors must be re-sent after a reset regardless of whether
+                // they changed from the previous cell.
                 self.writer
                     .queue(style::SetColors(Colors::new(
                         Self::map_color(cell.fg),
@@ -141,7 +134,7 @@ impl Backend for SshBackend {
                     )))
                     .map_err(io::Error::other)?;
 
-                // Then set only the attributes this cell needs
+                // Set only the attributes this cell needs.
                 let mut attrs = Attributes::default();
                 if cell.modifier.contains(Modifier::BOLD) {
                     attrs.set(Attribute::Bold);
@@ -158,10 +151,25 @@ impl Backend for SshBackend {
                 if cell.modifier.contains(Modifier::REVERSED) {
                     attrs.set(Attribute::Reverse);
                 }
+                if !cell.modifier.is_empty() {
+                    self.writer
+                        .queue(style::SetAttributes(attrs))
+                        .map_err(io::Error::other)?;
+                }
+
+                prev_mods = cell.modifier;
+                prev_fg = cell.fg;
+                prev_bg = cell.bg;
+            } else if colors_changed {
+                // Modifiers unchanged — just update colors.
                 self.writer
-                    .queue(style::SetAttributes(attrs))
+                    .queue(style::SetColors(Colors::new(
+                        Self::map_color(cell.fg),
+                        Self::map_color(cell.bg),
+                    )))
                     .map_err(io::Error::other)?;
-                prev_mods = Some(cell.modifier);
+                prev_fg = cell.fg;
+                prev_bg = cell.bg;
             }
 
             // Write the symbol
@@ -170,11 +178,9 @@ impl Backend for SshBackend {
                 .map_err(io::Error::other)?;
         }
 
-        // Flush all buffered writes in one SSH packet
-        // Ensure no SGR attributes (reverse, bold, etc.) leak beyond this
-        // draw. Emit a reset (SGR 0) so any terminal state is cleared.
+        // Reset all attributes so no SGR state leaks beyond this frame.
         self.writer
-            .queue(style::Print("\x1b[0m"))
+            .queue(SetAttribute(Attribute::Reset))
             .map_err(io::Error::other)?;
 
         self.writer.flush()
