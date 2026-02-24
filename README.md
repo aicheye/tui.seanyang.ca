@@ -1,6 +1,6 @@
 # tui.seanyang.me
 
-A personal portfolio and introduction, served over SSH as an interactive TUI. Heavily inspired by https://www.terminal.shop/
+A personal portfolio and introduction, served over SSH as an interactive TUI. Heavily inspired by <https://www.terminal.shop/>
 
 ```bash
 ssh seanyang.me
