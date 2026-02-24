@@ -171,6 +171,12 @@ impl Backend for SshBackend {
         }
 
         // Flush all buffered writes in one SSH packet
+        // Ensure no SGR attributes (reverse, bold, etc.) leak beyond this
+        // draw. Emit a reset (SGR 0) so any terminal state is cleared.
+        self.writer
+            .queue(style::Print("\x1b[0m"))
+            .map_err(io::Error::other)?;
+
         self.writer.flush()
     }
 

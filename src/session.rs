@@ -102,10 +102,24 @@ async fn tui_task(
     // (e.g. for future animations). 60 ms ≈ 16 fps.
     let mut tick = tokio::time::interval(Duration::from_millis(60));
 
+    // Coalesce rapid resize events: store the latest resize and apply on tick.
+    let mut pending_resize: Option<(u16, u16)> = None;
+    let mut dirty = false;
+
     loop {
         tokio::select! {
             _ = tick.tick() => {
-                // Future: mark dirty and only redraw when state changed.
+                // Apply a pending resize (if any) once per tick to avoid
+                // re-rendering continuously during a drag/resize.
+                if let Some((w, h)) = pending_resize.take() {
+                    app.resize(w, h);
+                    terminal.backend_mut().resize(w, h);
+                    terminal.resize(ratatui::layout::Rect::new(0, 0, w, h))?;
+                    terminal.draw(|f| ui::render(f, &app))?;
+                } else if dirty {
+                    terminal.draw(|f| ui::render(f, &app))?;
+                    dirty = false;
+                }
             }
 
             msg = msg_rx.recv() => {
@@ -113,7 +127,6 @@ async fn tui_task(
                     None | Some(SessionMsg::Shutdown) => break,
 
                     Some(SessionMsg::Input(bytes)) => {
-                        let mut dirty = false;
                         for key in parse_keys(&bytes) {
                             dirty |= app.handle_key(key);
                         }
@@ -122,14 +135,13 @@ async fn tui_task(
                         }
                         if dirty {
                             terminal.draw(|f| ui::render(f, &app))?;
+                            dirty = false;
                         }
                     }
 
                     Some(SessionMsg::Resize(w, h)) => {
-                        app.resize(w, h);
-                        terminal.backend_mut().resize(w, h);
-                        terminal.resize(ratatui::layout::Rect::new(0, 0, w, h))?;
-                        terminal.draw(|f| ui::render(f, &app))?;
+                        // Coalesce rapid resize events; apply on next tick.
+                        pending_resize = Some((w, h));
                     }
                 }
             }
