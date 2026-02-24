@@ -53,7 +53,7 @@ pub const PROJECTS: &[Project] = &[
         long_description: "Bucket is a unified dashboard for University of Waterloo students, aggregating \
                            timetables, grades, deadlines in one place. Built with TypeScript and Hasura \
                            GraphQL for real-time updates.",
-        languages: &["TypeScript", "JavaScript"],
+        languages: &["TypeScript", "GraphQL", "Docker"],
         features: &[
             "Student dashboard",
             "Real-time data",
@@ -87,7 +87,7 @@ pub const PROJECTS: &[Project] = &[
         long_description: "EZP2P Arcade uses WebRTC to connect players directly, eliminating the need for \
                            a game server. Multiple classic games are playable with anyone who has a browser, \
                            over a direct peer connection.",
-        languages: &["JavaScript", "HTML", "CSS"],
+        languages: &["React", "Vite", "TypeScript"],
         features: &[
             "P2P via WebRTC",
             "Multiple games",

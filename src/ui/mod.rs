@@ -7,7 +7,7 @@ pub mod theme;
 use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
+    style::{Modifier, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph, Tabs},
 };
@@ -103,14 +103,12 @@ fn render_nav(f: &mut Frame, app: &App, area: Rect) {
 }
 
 fn render_footer(f: &mut Frame, _app: &App, area: Rect) {
-    let bg = Color::Rgb(0x26, 0x32, 0x44);
     let key = Style::default()
         .fg(theme::PRIMARY)
-        .bg(bg)
         .add_modifier(Modifier::BOLD);
-    let label = Style::default().fg(theme::HI).bg(bg);
+    let label = Style::default().fg(theme::HI);
 
-    // " q quit " = 8 chars
+    // "<q> quit" = 8 chars
     let bar_width: u16 = 8;
 
     let cols = Layout::default()
@@ -127,8 +125,8 @@ fn render_footer(f: &mut Frame, _app: &App, area: Rect) {
     )]);
     f.render_widget(Paragraph::new(made_with), cols[0]);
 
-    let text = Line::from(vec![Span::styled(" q", key), Span::styled(" quit ", label)]);
-    let footer = Paragraph::new(text).style(Style::default().bg(bg));
+    let text = Line::from(vec![Span::styled("<q>", key), Span::styled(" quit", label)]);
+    let footer = Paragraph::new(text).style(Style::default());
     f.render_widget(footer, cols[1]);
 }
 
