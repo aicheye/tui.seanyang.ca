@@ -15,9 +15,9 @@ RUN case "${TARGETARCH}" in \
     esac && \
     TAG="${VERSION}" && \
     if [ "${TAG}" = "latest" ]; then \
-        TAG=$(curl -fsSL "https://api.github.com/repos/aicheye/tui.seanyang.me/releases/latest" | \
-              grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/'); \
-        echo "Resolved latest -> ${TAG}"; \
+    TAG=$(curl -fsSL "https://api.github.com/repos/aicheye/tui.seanyang.me/releases/latest" | \
+    grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/'); \
+    echo "Resolved latest -> ${TAG}"; \
     fi && \
     BASE="https://github.com/aicheye/tui.seanyang.me/releases/download/${TAG}" && \
     curl -fsSL "${BASE}/${ASSET}.zip" -o "/tmp/${ASSET}.zip" && \
