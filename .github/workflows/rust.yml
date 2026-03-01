@@ -22,23 +22,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             asset_name: tui-seanyang-me-linux-x64
-            binary_name: tui-seanyang-me
-          - os: ubuntu-24.04-arm
-            asset_name: tui-seanyang-me-linux-arm
-            binary_name: tui-seanyang-me
-          - os: windows-latest
-            asset_name: tui-seanyang-me-windows-x64
-            binary_name: tui-seanyang-me.exe
-          - os: windows-11-arm
-            asset_name: tui-seanyang-me-windows-arm
-            binary_name: tui-seanyang-me.exe
-          - os: macos-latest
-            asset_name: tui-seanyang-me-macos-arm
-            binary_name: tui-seanyang-me
-          - os: macos-15-intel
-            asset_name: tui-seanyang-me-macos-x64
             binary_name: tui-seanyang-me
 
     runs-on: ${{ matrix.os }}
