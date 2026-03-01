@@ -10,6 +10,7 @@ RUN apt-get update && \
 # Map Docker TARGETARCH to release asset names, resolve latest tag if needed
 RUN case "${TARGETARCH}" in \
     amd64) ASSET="tui-seanyang-me-linux-x64" ;; \
+    arm64) ASSET="tui-seanyang-me-linux-arm64" ;; \
     *)     echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
     esac && \
     TAG="${VERSION}" && \
