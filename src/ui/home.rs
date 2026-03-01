@@ -1,3 +1,4 @@
+use rand::seq::SliceRandom;
 use ratatui::{
     Frame,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
@@ -7,7 +8,14 @@ use ratatui::{
 };
 
 use super::theme;
-use crate::{app::App, data::portfolio::BUILDING};
+use crate::{
+    data::{
+        portfolio::BUILDING,
+        quotes::{QUOTES, Quote},
+    },
+    input::Key,
+    section::SectionView,
+};
 
 /// ASCII art wordmark — rendered at the top of the home screen.
 const WORDMARK: &str = r#"
@@ -18,25 +26,61 @@ const WORDMARK: &str = r#"
                               `---'                   `---'
 "#;
 
-pub fn render(f: &mut Frame, app: &App, area: Rect) {
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Length(1),                                   // top margin
-            Constraint::Length(WORDMARK.lines().count() as u16 + 1), // wordmark
-            Constraint::Length(2),                                   // tagline
-            Constraint::Length(1),                                   // spacer
-            Constraint::Min(8),                                      // bio + building
-            Constraint::Length(1),                                   // space above quote
-            Constraint::Length(6),                                   // quote
-            Constraint::Fill(1),                                     // bottom fill
-        ])
-        .split(area);
+pub struct HomeSection {
+    order: Vec<usize>,
+    cursor: usize,
+}
 
-    render_wordmark(f, chunks[1]);
-    render_tagline(f, chunks[2]);
-    render_bio_and_building(f, app, chunks[4]);
-    render_quote(f, app, chunks[6]);
+impl HomeSection {
+    pub fn new() -> Self {
+        let mut rng = rand::thread_rng();
+        let mut order: Vec<usize> = (0..QUOTES.len()).collect();
+        order.shuffle(&mut rng);
+        Self { order, cursor: 0 }
+    }
+
+    fn current_quote(&self) -> &'static Quote {
+        &QUOTES[self.order[self.cursor]]
+    }
+}
+
+impl SectionView for HomeSection {
+    fn label(&self) -> &'static str {
+        "Home"
+    }
+
+    fn handle_key(&mut self, key: Key) {
+        match key {
+            Key::Right | Key::Char('l') | Key::Char('n') => {
+                self.cursor = (self.cursor + 1) % self.order.len();
+            }
+            Key::Left | Key::Char('h') | Key::Char('p') => {
+                self.cursor = self.cursor.checked_sub(1).unwrap_or(self.order.len() - 1);
+            }
+            _ => {}
+        }
+    }
+
+    fn render(&self, f: &mut Frame, area: Rect) {
+        let chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Length(1),                                   // top margin
+                Constraint::Length(WORDMARK.lines().count() as u16 + 1), // wordmark
+                Constraint::Length(2),                                   // tagline
+                Constraint::Length(1),                                   // spacer
+                Constraint::Min(8),                                      // bio + building
+                Constraint::Length(1),                                   // space above quote
+                Constraint::Length(6),                                   // quote
+                Constraint::Fill(1),                                     // bottom fill
+            ])
+            .split(area);
+
+        render_wordmark(f, chunks[1]);
+        render_tagline(f, chunks[2]);
+        render_bio_and_building(f, chunks[4]);
+        render_quote(f, self, chunks[6]);
+    }
 }
 
 fn render_wordmark(f: &mut Frame, area: Rect) {
@@ -60,7 +104,7 @@ fn render_tagline(f: &mut Frame, area: Rect) {
     f.render_widget(p, area);
 }
 
-fn render_bio_and_building(f: &mut Frame, _app: &App, area: Rect) {
+fn render_bio_and_building(f: &mut Frame, area: Rect) {
     let cols = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
@@ -114,9 +158,9 @@ fn render_building(f: &mut Frame, area: Rect) {
     f.render_widget(p, area);
 }
 
-fn render_quote(f: &mut Frame, app: &App, area: Rect) {
-    let quote = app.current_quote();
-    let index_label = format!("{} / {}", app.quote_cursor + 1, app.quote_order.len());
+fn render_quote(f: &mut Frame, section: &HomeSection, area: Rect) {
+    let quote = section.current_quote();
+    let index_label = format!("{} / {}", section.cursor + 1, section.order.len());
 
     let tui_lines = vec![
         theme::divider("quote", area.width),

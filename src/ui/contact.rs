@@ -7,28 +7,42 @@ use ratatui::{
 };
 
 use super::theme;
-use crate::{app::App, data::socials::SOCIALS};
+use crate::{data::socials::SOCIALS, section::SectionView};
 
-pub fn render(f: &mut Frame, _app: &App, area: Rect) {
-    let rows = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Length(1), // top margin
-            Constraint::Min(1),    // content
-        ])
-        .split(area);
+pub struct ContactSection;
 
-    let chunks = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Percentage(44),
-            Constraint::Length(2),
-            Constraint::Percentage(56),
-        ])
-        .split(rows[1]);
+impl ContactSection {
+    pub fn new() -> Self {
+        Self
+    }
+}
 
-    render_blurb(f, chunks[0]);
-    render_socials(f, chunks[2]);
+impl SectionView for ContactSection {
+    fn label(&self) -> &'static str {
+        "Contact"
+    }
+
+    fn render(&self, f: &mut Frame, area: Rect) {
+        let rows = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Length(1), // top margin
+                Constraint::Min(1),    // content
+            ])
+            .split(area);
+
+        let chunks = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([
+                Constraint::Percentage(44),
+                Constraint::Length(2),
+                Constraint::Percentage(56),
+            ])
+            .split(rows[1]);
+
+        render_blurb(f, chunks[0]);
+        render_socials(f, chunks[2]);
+    }
 }
 
 fn render_blurb(f: &mut Frame, area: Rect) {

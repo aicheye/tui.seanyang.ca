@@ -1,3 +1,4 @@
+use rand::seq::SliceRandom;
 use ratatui::{
     Frame,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
@@ -7,31 +8,71 @@ use ratatui::{
 };
 
 use super::theme;
-use crate::app::App;
+use crate::{
+    data::songs::{SONGS, Song},
+    input::Key,
+    section::SectionView,
+};
 
-pub fn render(f: &mut Frame, app: &App, area: Rect) {
-    let rows = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Length(1), // top margin
-            Constraint::Length(6), // song
-            Constraint::Min(1),    // about + poke
-        ])
-        .split(area);
+pub struct AboutSection {
+    order: Vec<usize>,
+    cursor: usize,
+}
 
-    render_song_card(f, app, rows[1]);
+impl AboutSection {
+    pub fn new() -> Self {
+        let mut rng = rand::thread_rng();
+        let mut order: Vec<usize> = (0..SONGS.len()).collect();
+        order.shuffle(&mut rng);
+        Self { order, cursor: 0 }
+    }
 
-    let cols = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Percentage(54),
-            Constraint::Length(2),
-            Constraint::Percentage(44),
-        ])
-        .split(rows[2]);
+    fn current_song(&self) -> &'static Song {
+        &SONGS[self.order[self.cursor]]
+    }
+}
 
-    render_about_card(f, cols[0]);
-    render_poke_card(f, cols[2]);
+impl SectionView for AboutSection {
+    fn label(&self) -> &'static str {
+        "About"
+    }
+
+    fn handle_key(&mut self, key: Key) {
+        match key {
+            Key::Right | Key::Char('l') => {
+                self.cursor = (self.cursor + 1) % self.order.len();
+            }
+            Key::Left | Key::Char('h') => {
+                self.cursor = self.cursor.checked_sub(1).unwrap_or(self.order.len() - 1);
+            }
+            _ => {}
+        }
+    }
+
+    fn render(&self, f: &mut Frame, area: Rect) {
+        let rows = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Length(1), // top margin
+                Constraint::Length(6), // song
+                Constraint::Min(1),    // about + poke
+            ])
+            .split(area);
+
+        render_song_card(f, self, rows[1]);
+
+        let cols = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([
+                Constraint::Percentage(54),
+                Constraint::Length(2),
+                Constraint::Percentage(44),
+            ])
+            .split(rows[2]);
+
+        render_about_card(f, cols[0]);
+        render_poke_card(f, cols[2]);
+    }
 }
 
 fn render_about_card(f: &mut Frame, area: Rect) {
@@ -125,16 +166,16 @@ fn fact(key: &'static str, value: &'static str, col_width: u16) -> Vec<Line<'sta
     lines
 }
 
-fn render_song_card(f: &mut Frame, app: &App, area: Rect) {
-    let song = app.current_song();
-    let index_label = format!("{} / {}", app.song_cursor + 1, app.song_order.len());
+fn render_song_card(f: &mut Frame, section: &AboutSection, area: Rect) {
+    let song = section.current_song();
+    let index_label = format!("{} / {}", section.cursor + 1, section.order.len());
     let spotify_url = format!("https://open.spotify.com/track/{}", song.id);
 
     let text = vec![
         theme::divider("song recommendations", area.width),
         Line::from(""),
         Line::from(Span::styled(
-            format!("♫⋆｡♪ ₊˚♬ ﾟ. {}  ♫ ⋆♪ ₊˚♬ ﾟ.", song.desc),
+            format!("｡♪ ₊♫ ⋆˚♬. {}  ♫ ⋆♪ ₊˚♬.", song.desc),
             Style::default()
                 .fg(theme::HI)
                 .add_modifier(Modifier::ITALIC),

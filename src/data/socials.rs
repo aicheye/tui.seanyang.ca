@@ -31,6 +31,11 @@ pub const SOCIALS: &[Social] = &[
         handle: "aicheye",
     },
     Social {
+        name: "Bluesky",
+        url: "https://bsky.app/profile/seanyang.me",
+        handle: "seanyang.me",
+    },
+    Social {
         name: "Email",
         url: "mailto:sean@seanyang.me",
         handle: "sean@seanyang.me",

@@ -12,7 +12,7 @@ use ratatui::{
     widgets::{Block, Borders, Paragraph, Tabs},
 };
 
-use crate::app::{App, Section};
+use crate::app::App;
 
 /// Top-level render: draws the chrome (nav bar + footer) then delegates to
 /// the active section renderer.
@@ -42,8 +42,8 @@ pub fn render(f: &mut Frame, app: &App) {
         .split(padded);
 
     render_nav(f, app, chunks[1]);
-    render_section(f, app, chunks[2]);
-    render_footer(f, app, chunks[3]);
+    app.sections[app.active].render(f, chunks[2]);
+    render_footer(f, chunks[3]);
 }
 
 // ---------------------------------------------------------------------------
@@ -51,7 +51,8 @@ pub fn render(f: &mut Frame, app: &App) {
 // ---------------------------------------------------------------------------
 
 fn render_nav(f: &mut Frame, app: &App, area: Rect) {
-    let tab_titles: Vec<Line> = Section::ALL
+    let tab_titles: Vec<Line> = app
+        .sections
         .iter()
         .enumerate()
         .map(|(i, s)| {
@@ -84,7 +85,7 @@ fn render_nav(f: &mut Frame, app: &App, area: Rect) {
 
     let tabs = Tabs::new(tab_titles)
         .block(block)
-        .select(app.section.index())
+        .select(app.active)
         .style(theme::secondary())
         .highlight_style(theme::primary_bold())
         .divider(Span::styled(" · ", theme::secondary()));
@@ -102,7 +103,7 @@ fn render_nav(f: &mut Frame, app: &App, area: Rect) {
     f.render_widget(resume, resume_rows[1]);
 }
 
-fn render_footer(f: &mut Frame, _app: &App, area: Rect) {
+fn render_footer(f: &mut Frame, area: Rect) {
     let key = Style::default()
         .fg(theme::PRIMARY)
         .add_modifier(Modifier::BOLD);
@@ -128,17 +129,4 @@ fn render_footer(f: &mut Frame, _app: &App, area: Rect) {
     let text = Line::from(vec![Span::styled("<q>", key), Span::styled(" quit", label)]);
     let footer = Paragraph::new(text).style(Style::default());
     f.render_widget(footer, cols[1]);
-}
-
-// ---------------------------------------------------------------------------
-// Section dispatch
-// ---------------------------------------------------------------------------
-
-fn render_section(f: &mut Frame, app: &App, area: Rect) {
-    match &app.section {
-        Section::Home => home::render(f, app, area),
-        Section::About => about::render(f, app, area),
-        Section::Portfolio => portfolio::render(f, app, area),
-        Section::Contact => contact::render(f, app, area),
-    }
 }

@@ -7,36 +7,80 @@ use ratatui::{
 };
 
 use super::theme;
-use crate::{app::App, data::portfolio::PROJECTS};
+use crate::{data::portfolio::PROJECTS, input::Key, section::SectionView};
 
-pub fn render(f: &mut Frame, app: &App, area: Rect) {
-    let rows = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Length(1), // top margin
-            Constraint::Min(1),    // content
-        ])
-        .split(area);
-
-    let chunks = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Percentage(39),
-            Constraint::Length(2),
-            Constraint::Percentage(59),
-        ])
-        .split(rows[1]);
-
-    render_list(f, app, chunks[0]);
-    render_preview(f, app, chunks[2]);
+pub struct PortfolioSection {
+    cursor: usize,
+    scroll: u16,
 }
 
-fn render_list(f: &mut Frame, app: &App, area: Rect) {
+impl PortfolioSection {
+    pub fn new() -> Self {
+        Self {
+            cursor: 0,
+            scroll: 0,
+        }
+    }
+}
+
+impl SectionView for PortfolioSection {
+    fn label(&self) -> &'static str {
+        "Portfolio"
+    }
+
+    fn handle_key(&mut self, key: Key) {
+        match key {
+            Key::Left | Key::Char('h') => {
+                if self.cursor > 0 {
+                    self.cursor -= 1;
+                    self.scroll = 0;
+                }
+            }
+            Key::Right | Key::Char('l') => {
+                if self.cursor + 1 < PROJECTS.len() {
+                    self.cursor += 1;
+                    self.scroll = 0;
+                }
+            }
+            Key::Up | Key::Char('k') => {
+                self.scroll = self.scroll.saturating_sub(1);
+            }
+            Key::Down | Key::Char('j') => {
+                self.scroll = self.scroll.saturating_add(1);
+            }
+            _ => {}
+        }
+    }
+
+    fn render(&self, f: &mut Frame, area: Rect) {
+        let rows = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Length(1), // top margin
+                Constraint::Min(1),    // content
+            ])
+            .split(area);
+
+        let chunks = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([
+                Constraint::Percentage(39),
+                Constraint::Length(2),
+                Constraint::Percentage(59),
+            ])
+            .split(rows[1]);
+
+        render_list(f, self, chunks[0]);
+        render_preview(f, self, chunks[2]);
+    }
+}
+
+fn render_list(f: &mut Frame, section: &PortfolioSection, area: Rect) {
     let items: Vec<ListItem> = PROJECTS
         .iter()
         .enumerate()
         .map(|(i, p)| {
-            let is_selected = i == app.portfolio_cursor;
+            let is_selected = i == section.cursor;
             if is_selected {
                 ListItem::new(Line::from(vec![
                     Span::styled("▸ ", theme::primary_bold()),
@@ -73,7 +117,7 @@ fn render_list(f: &mut Frame, app: &App, area: Rect) {
 
     let list = List::new(items);
     let mut state = ListState::default();
-    state.select(Some(app.portfolio_cursor));
+    state.select(Some(section.cursor));
     f.render_stateful_widget(list, chunks[2], &mut state);
 
     let hint = Line::from(vec![
@@ -88,8 +132,8 @@ fn render_list(f: &mut Frame, app: &App, area: Rect) {
     );
 }
 
-fn render_preview(f: &mut Frame, app: &App, area: Rect) {
-    let p = &PROJECTS[app.portfolio_cursor];
+fn render_preview(f: &mut Frame, section: &PortfolioSection, area: Rect) {
+    let p = &PROJECTS[section.cursor];
 
     let lang_str = p.languages.join("  ·  ");
     let feature_lines: Vec<Line> = p
@@ -139,7 +183,7 @@ fn render_preview(f: &mut Frame, app: &App, area: Rect) {
     // Calculate max scroll
     let content_lines = text.len() as u16;
     let max_scroll = content_lines.saturating_sub(area.height);
-    let clamped_scroll = app.portfolio_scroll.min(max_scroll);
+    let clamped_scroll = section.scroll.min(max_scroll);
 
     let para = Paragraph::new(text)
         .wrap(Wrap { trim: true })

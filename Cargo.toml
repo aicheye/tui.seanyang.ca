@@ -1,6 +1,6 @@
 [package]
 name = "tui-seanyang-me"
-version = "0.3.4"
+version = "0.4.0"
 edition = "2024"
 authors = ["Sean Yang <sean@seanyang.me>"]
 description = "SSH server for seanyang.me"
@@ -12,13 +12,11 @@ name = "tui-seanyang-me"
 path = "src/main.rs"
 
 [dependencies]
-# SSH server
-russh = "0.44"
-russh-keys = "0.44"
+# SSH TUI framework
+chai-framework = "2.0"
 
-# TUI
-ratatui = "0.29"
-crossterm = "0.28"
+# TUI (must match chai-framework's ratatui version)
+ratatui = "0.30"
 
 # Async runtime
 tokio = { version = "1", features = ["full"] }
@@ -26,7 +24,5 @@ tokio = { version = "1", features = ["full"] }
 # Utilities
 anyhow = "1"
 rand = "0.8"
-async-trait = "0.1"
-bytes = "1"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

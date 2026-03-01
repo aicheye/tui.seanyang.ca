@@ -48,4 +48,16 @@ pub const QUOTES: &[Quote] = &[
         text: "And you ask, 'What if I fall?' Oh, but my darling, what if you fly?",
         author: "Erin Hanson",
     },
+    Quote {
+        text: "The future belongs to those who believe in the beauty of their dreams.",
+        author: "Eleanor Roosevelt",
+    },
+    Quote {
+        text: "Wherever you go, there you are.",
+        author: "Eckhart Tolle",
+    },
+    Quote {
+        text: "The wound is the place where the light enters you.",
+        author: "Rumi",
+    },
 ];
