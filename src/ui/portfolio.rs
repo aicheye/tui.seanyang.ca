@@ -43,10 +43,10 @@ impl SectionView for PortfolioSection {
                 }
             }
             Key::Up | Key::Char('k') => {
-                self.scroll = self.scroll.saturating_sub(1);
+                self.scroll = self.scroll.wrapping_sub(1);
             }
             Key::Down | Key::Char('j') => {
-                self.scroll = self.scroll.saturating_add(1);
+                self.scroll = self.scroll.wrapping_add(1);
             }
             _ => {}
         }
