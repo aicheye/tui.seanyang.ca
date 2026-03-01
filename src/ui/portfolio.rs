@@ -33,20 +33,24 @@ impl SectionView for PortfolioSection {
             Key::Left | Key::Char('h') => {
                 if self.cursor > 0 {
                     self.cursor -= 1;
-                    self.scroll = 0;
+                } else {
+                    self.cursor = PROJECTS.len() - 1;
                 }
+                self.scroll = 0;
             }
             Key::Right | Key::Char('l') => {
                 if self.cursor + 1 < PROJECTS.len() {
                     self.cursor += 1;
-                    self.scroll = 0;
+                } else {
+                    self.cursor = 0;
                 }
+                self.scroll = 0;
             }
             Key::Up | Key::Char('k') => {
-                self.scroll = self.scroll.wrapping_sub(1);
+                self.scroll = self.scroll.saturating_sub(1);
             }
             Key::Down | Key::Char('j') => {
-                self.scroll = self.scroll.wrapping_add(1);
+                self.scroll = self.scroll.saturating_add(1);
             }
             _ => {}
         }
