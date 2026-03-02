@@ -54,7 +54,7 @@ pub const QUOTES: &[Quote] = &[
     },
     Quote {
         text: "Wherever you go, there you are.",
-        author: "Eckhart Tolle",
+        author: "Thomas à Kempis",
     },
     Quote {
         text: "The wound is the place where the light enters you.",
