@@ -90,8 +90,8 @@ impl SectionView for HomeSection {
                 Constraint::Length(1),                               // tagline
                 Constraint::Length(1),                               // spacer
                 Constraint::Length(2),                               // progress bar
-                Constraint::Min(3),                                  // gap
-                Constraint::Length(5),                               // quote
+                Constraint::Min(2),                                  // gap
+                Constraint::Length(6),                               // quote
             ])
             .split(area);
 
