@@ -1,6 +1,6 @@
 [package]
 name = "tui-seanyang-me"
-version = "2.0.1"
+version = "2.0.2"
 edition = "2024"
 authors = ["Sean Yang <sean@seanyang.me>"]
 description = "SSH server for seanyang.me"
