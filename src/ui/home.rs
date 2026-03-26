@@ -4,27 +4,45 @@ use ratatui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Modifier, Style},
     text::{Line, Span},
-    widgets::{Paragraph, Wrap},
+    widgets::Paragraph,
 };
 
 use super::theme;
 use crate::{
-    data::{
-        portfolio::BUILDING,
-        quotes::{QUOTES, Quote},
-    },
+    data::quotes::{QUOTES, Quote},
+    data::socials::PRIMARY_EMAIL,
     input::Key,
     section::SectionView,
 };
 
 /// ASCII art wordmark — rendered at the top of the home screen.
-const WORDMARK: &str = r#"
- ,---.  ,---.  ,--,--.,--,--, ,--. ,--.,--,--.,--,--,  ,---.
-(  .-' | .-. :' ,-.  ||      \ \  '  /' ,-.  ||      \| .-. |
-.-'  `)\   --.\ '-'  ||  ||  |  \   ' \ '-'  ||  ||  |' '-' '
-`----'  `----' `--`--'`--''--'.-'  /   `--`--'`--''--'.`-  /
-                              `---'                   `---'
-"#;
+const WORDMARK: &str = r#"┏━┓┏━╸┏━┓┏┓╻   ╻ ╻┏━┓┏┓╻┏━╸
+┗━┓┣╸ ┣━┫┃┗┫   ┗┳┛┣━┫┃┗┫┃╺┓
+┗━┛┗━╸╹ ╹╹ ╹    ╹ ╹ ╹╹ ╹┗━┛"#;
+
+// University progress bar constants
+// UWaterloo BSE: 2025-09-01 → 2030-05-01
+const UNI_START: u64 = 1_756_684_800; // 2025-09-01 UTC
+const UNI_END: u64 = 1_903_824_000; // 2030-05-01 UTC
+const UNI_TOTAL: f64 = (UNI_END - UNI_START) as f64;
+
+// Term boundary timestamps (UTC) — tick marks on the progress bar.
+// Each entry is where one academic term ends and the next begins.
+const TERM_MARKS: &[u64] = &[
+    1_767_225_600, // 2026-01-01
+    1_777_593_600, // 2026-05-01
+    1_788_220_800, // 2026-09-01
+    1_798_761_600, // 2027-01-01
+    1_809_129_600, // 2027-05-01
+    1_819_756_800, // 2027-09-01
+    1_830_297_600, // 2028-01-01
+    1_840_752_000, // 2028-05-01
+    1_851_379_200, // 2028-09-01
+    1_861_920_000, // 2029-01-01
+    1_872_288_000, // 2029-05-01
+    1_882_915_200, // 2029-09-01
+    1_893_456_000, // 2030-01-01
+];
 
 pub struct HomeSection {
     order: Vec<usize>,
@@ -65,124 +83,194 @@ impl SectionView for HomeSection {
         let chunks = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
-                Constraint::Length(1),                                   // top margin
-                Constraint::Length(WORDMARK.lines().count() as u16 + 1), // wordmark
-                Constraint::Length(2),                                   // tagline
-                Constraint::Length(1),                                   // spacer
-                Constraint::Min(8),                                      // bio + building
-                Constraint::Length(1),                                   // space above quote
-                Constraint::Length(6),                                   // quote
-                Constraint::Fill(1),                                     // bottom fill
+                Constraint::Length(1),                               // top margin
+                Constraint::Length(WORDMARK.lines().count() as u16), // wordmark
+                Constraint::Length(1),                               // location
+                Constraint::Length(1),                               // spacer
+                Constraint::Length(1),                               // tagline
+                Constraint::Length(1),                               // spacer
+                Constraint::Length(2),                               // progress bar
+                Constraint::Min(3),                                  // gap
+                Constraint::Length(5),                               // quote
             ])
             .split(area);
 
         render_wordmark(f, chunks[1]);
-        render_tagline(f, chunks[2]);
-        render_bio_and_building(f, chunks[4]);
-        render_quote(f, self, chunks[6]);
+        render_location(f, chunks[2]);
+        render_tagline(f, chunks[4]);
+        render_progress(f, chunks[6]);
+        render_quote(f, self, chunks[8]);
     }
 }
 
 fn render_wordmark(f: &mut Frame, area: Rect) {
     let p = Paragraph::new(WORDMARK)
-        .style(theme::primary_bold())
+        .style(theme::green_bold())
         .alignment(Alignment::Center);
     f.render_widget(p, area);
 }
 
+fn render_location(f: &mut Frame, area: Rect) {
+    let right = "⦿ Waterloo, ON";
+    let pad =
+        (area.width as usize).saturating_sub(PRIMARY_EMAIL.chars().count() + right.chars().count());
+    let line = Line::from(vec![
+        Span::styled(PRIMARY_EMAIL, theme::secondary()),
+        Span::raw(" ".repeat(pad)),
+        Span::styled("⦿ ", theme::primary()),
+        Span::styled("Waterloo, ON", theme::secondary()),
+    ]);
+    f.render_widget(Paragraph::new(line), area);
+}
+
 fn render_tagline(f: &mut Frame, area: Rect) {
     let line = Line::from(vec![
-        Span::styled("coder", theme::body()),
-        Span::styled("  ·  ", theme::secondary()),
+        Span::styled("[  ", theme::green()),
+        Span::styled("robotics engineer", theme::body()),
+        Span::styled(" · ", theme::green()),
         Span::styled("sustainable urbanist", theme::body()),
-        Span::styled("  ·  ", theme::secondary()),
+        Span::styled(" · ", theme::green()),
         Span::styled("democratic socialist", theme::body()),
-        Span::styled("  ·  ", theme::secondary()),
-        Span::styled("SE @ UWaterloo", theme::body()),
+        Span::styled(" · ", theme::green()),
+        Span::styled("optimist", theme::body()),
+        Span::styled("  ]", theme::green()),
     ]);
     let p = Paragraph::new(line).alignment(Alignment::Center);
     f.render_widget(p, area);
 }
 
-fn render_bio_and_building(f: &mut Frame, area: Rect) {
-    let cols = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Percentage(54),
-            Constraint::Length(2),
-            Constraint::Percentage(44),
-        ])
-        .split(area);
+fn render_progress(f: &mut Frame, area: Rect) {
+    use std::time::{SystemTime, UNIX_EPOCH};
 
-    // Left: greeting + bio
-    let bio_text = vec![
-        Line::from(Span::styled("Hello, World!", theme::primary_bold())),
-        Line::from(""),
-        Line::from(Span::styled(
-            "I'm a coder, sustainable urbanist, and advocate for economic justice \
-             studying Software Engineering at the University of Waterloo.",
-            theme::body(),
-        )),
-    ];
-    let bio = Paragraph::new(bio_text).wrap(Wrap { trim: true });
-    f.render_widget(bio, cols[0]);
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(UNI_START);
 
-    // Right: currently building
-    render_building(f, cols[2]);
-}
+    let elapsed = now.saturating_sub(UNI_START) as f64;
+    let pct = (elapsed / UNI_TOTAL * 100.0).clamp(0.0, 100.0);
+    let fill_frac = pct / 100.0;
 
-fn render_building(f: &mut Frame, area: Rect) {
-    let mut lines: Vec<Line> = vec![
-        theme::divider("currently building", area.width),
-        Line::from(""),
-    ];
+    let bar_w = area.width as usize;
+    let filled = (fill_frac * bar_w as f64) as usize;
 
-    for b in BUILDING.iter() {
-        lines.push(Line::from(vec![
-            Span::styled("▸ ", theme::primary()),
-            Span::styled(
-                b.name,
-                Style::default()
-                    .fg(theme::PRIMARY)
-                    .add_modifier(Modifier::BOLD),
-            ),
-        ]));
-        lines.push(Line::from(vec![
-            Span::raw("  "),
-            Span::styled(b.description, theme::secondary()),
-        ]));
-        lines.push(Line::from(""));
+    // Compute tick column positions from timestamps
+    let tick_cols: Vec<usize> = TERM_MARKS
+        .iter()
+        .map(|&ts| {
+            let frac = ts.saturating_sub(UNI_START) as f64 / UNI_TOTAL;
+            (frac * bar_w as f64).round() as usize
+        })
+        .filter(|&c| c < bar_w)
+        .collect();
+
+    // Build bar as grouped spans: runs of █, ░, and │ tick marks
+    let mut bar_spans: Vec<Span<'static>> = Vec::new();
+    let mut i = 0usize;
+    while i < bar_w {
+        if tick_cols.contains(&i) {
+            let style = if i < filled {
+                theme::body()
+            } else {
+                theme::secondary()
+            };
+            bar_spans.push(Span::styled("│", style));
+            i += 1;
+        } else {
+            let next_tick = tick_cols.iter().find(|&&c| c > i).copied().unwrap_or(bar_w);
+            let region_end = next_tick.min(bar_w);
+            let fill_end = filled.min(region_end);
+            if i < fill_end {
+                bar_spans.push(Span::styled(
+                    "█".repeat(fill_end - i),
+                    Style::default().fg(theme::GREEN),
+                ));
+                i = fill_end;
+            }
+            if i < region_end {
+                bar_spans.push(Span::styled("░".repeat(region_end - i), theme::secondary()));
+                i = region_end;
+            }
+        }
     }
 
-    let p = Paragraph::new(lines).wrap(Wrap { trim: true });
-    f.render_widget(p, area);
+    let left = "uwaterloo bse '30";
+    let right = format!("{:.8}%", pct);
+    let pad = (area.width as usize).saturating_sub(left.len() + right.len());
+    let label = Line::from(vec![
+        Span::styled(left, theme::secondary()),
+        Span::raw(" ".repeat(pad)),
+        Span::styled(right, theme::secondary()),
+    ]);
+    let bar = Line::from(bar_spans);
+
+    f.render_widget(Paragraph::new(vec![label, bar]), area);
 }
 
 fn render_quote(f: &mut Frame, section: &HomeSection, area: Rect) {
     let quote = section.current_quote();
     let index_label = format!("{} / {}", section.cursor + 1, section.order.len());
 
-    let tui_lines = vec![
-        theme::divider("quote", area.width),
-        Line::from(""),
-        Line::from(Span::styled(
-            format!("❝ {} ❞", quote.text),
-            Style::default()
-                .fg(theme::HI)
-                .add_modifier(Modifier::ITALIC),
-        )),
-        Line::from(""),
-        Line::from(vec![
-            Span::styled("— ", theme::secondary()),
-            Span::styled(quote.author, theme::primary_bold()),
-            Span::styled(format!("  ({index_label})  ",), theme::secondary()),
-            Span::styled("←/→", theme::primary()),
-            Span::styled(" prev/next", theme::secondary()),
-        ]),
-    ];
+    // Manual word-wrap so every visual line gets its own │ prefix.
+    let prefix_w = 3usize; // "│  "
+    let content_w = (area.width as usize).saturating_sub(prefix_w);
+    let full_text = format!("\"{}\"", quote.text);
+    let wrapped = word_wrap(&full_text, content_w);
 
-    let p = Paragraph::new(tui_lines)
-        .alignment(Alignment::Center)
-        .wrap(Wrap { trim: true });
-    f.render_widget(p, area);
+    let quote_style = Style::default()
+        .fg(theme::HI)
+        .add_modifier(Modifier::ITALIC);
+    let mut tui_lines: Vec<Line> = wrapped
+        .into_iter()
+        .map(|chunk| {
+            Line::from(vec![
+                Span::styled("│", theme::secondary()),
+                Span::raw("  "),
+                Span::styled(chunk, quote_style),
+            ])
+        })
+        .collect();
+
+    tui_lines.push(Line::from(Span::styled("│", theme::secondary())));
+    tui_lines.push(Line::from(vec![
+        Span::styled("│", theme::secondary()),
+        Span::raw("  "),
+        Span::styled("— ", theme::secondary()),
+        Span::styled(quote.author, theme::green_bold()),
+        Span::styled(format!("  ({index_label})  "), theme::secondary()),
+        Span::styled("←/→", theme::primary()),
+        Span::styled(" prev/next", theme::secondary()),
+    ]));
+
+    f.render_widget(Paragraph::new(tui_lines), area);
+}
+
+/// Word-wrap `text` so no line exceeds `max_width` display columns.
+/// Uses char count as a proxy for display width (sufficient for this content).
+fn word_wrap(text: &str, max_width: usize) -> Vec<String> {
+    if max_width == 0 {
+        return vec![text.to_string()];
+    }
+    let mut lines: Vec<String> = Vec::new();
+    let mut current = String::new();
+    let mut current_w = 0usize;
+    for word in text.split_whitespace() {
+        let word_w = word.chars().count();
+        if current.is_empty() {
+            current.push_str(word);
+            current_w = word_w;
+        } else if current_w + 1 + word_w <= max_width {
+            current.push(' ');
+            current.push_str(word);
+            current_w += 1 + word_w;
+        } else {
+            lines.push(std::mem::take(&mut current));
+            current.push_str(word);
+            current_w = word_w;
+        }
+    }
+    if !current.is_empty() {
+        lines.push(current);
+    }
+    lines
 }

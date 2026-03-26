@@ -310,9 +310,9 @@ dependencies = [
 
 [[package]]
 name = "chai-framework"
-version = "2.0.1"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a78d0c787062f0c91a1149b7a7397c4c3102a5e98c3a05d8cb165ece1b7a4e88"
+checksum = "e39c873353fcd894956716e54dcc81692e4ea4e23461691ab3ba0971c2b4054f"
 dependencies = [
  "anyhow",
  "ratatui",

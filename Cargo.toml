@@ -13,7 +13,7 @@ path = "src/main.rs"
 
 [dependencies]
 # SSH TUI framework
-chai-framework = "2.0"
+chai-framework = "2.1"
 
 # TUI (must match chai-framework's ratatui version)
 ratatui = "0.30"

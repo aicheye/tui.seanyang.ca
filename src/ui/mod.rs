@@ -1,12 +1,12 @@
-pub mod about;
-pub mod contact;
+pub mod experience;
 pub mod home;
-pub mod portfolio;
+pub mod links;
+pub mod projects;
 pub mod theme;
 
 use ratatui::{
     Frame,
-    layout::{Constraint, Direction, Layout, Rect},
+    layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Modifier, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph, Tabs},
@@ -19,31 +19,64 @@ use crate::app::App;
 pub fn render(f: &mut Frame, app: &App) {
     let area = f.area();
 
-    // Constrain and centre the entire chrome within configurable bounds.
-    let max_width: u16 = 80;
-    let min_width: u16 = 60;
-    let max_height: u16 = 40;
+    let target_width: u16 = 80;
+    let target_height: u16 = 22;
 
-    let width = area.width.min(max_width).max(min_width);
-    let height = area.height.min(max_height);
-    let x = area.x + (area.width.saturating_sub(width)) / 2;
-    let y = area.y + (area.height.saturating_sub(height)) / 2;
-    let padded = Rect::new(x, y, width.min(area.width), height.min(area.height));
+    if area.width < target_width || area.height < target_height {
+        render_too_small(f, area);
+        return;
+    }
+
+    let x = area.x + (area.width - target_width) / 2;
+    let y = area.y + (area.height - target_height) / 2;
+    let padded = Rect::new(x, y, target_width, target_height);
 
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(4), // top padding
             Constraint::Length(3), // nav bar (tabs + border)
             Constraint::Min(1),    // section content
             Constraint::Length(1), // footer
-            Constraint::Length(4), // bottom padding
         ])
         .split(padded);
 
-    render_nav(f, app, chunks[1]);
-    app.sections[app.active].render(f, chunks[2]);
-    render_footer(f, chunks[3]);
+    render_nav(f, app, chunks[0]);
+    app.sections[app.active].render(f, chunks[1]);
+    render_footer(f, chunks[2]);
+}
+
+// ---------------------------------------------------------------------------
+// Too-small fallback
+// ---------------------------------------------------------------------------
+
+fn render_too_small(f: &mut Frame, area: Rect) {
+    let block = Block::default()
+        .borders(Borders::ALL)
+        .border_style(theme::secondary());
+    let inner = block.inner(area);
+    f.render_widget(block, area);
+
+    if inner.height == 0 || inner.width == 0 {
+        return;
+    }
+
+    // Fill every cell with ░
+    let fill_row = "░".repeat(inner.width as usize);
+    let fill_lines: Vec<Line> = (0..inner.height)
+        .map(|_| Line::from(Span::styled(fill_row.clone(), theme::secondary())))
+        .collect();
+    f.render_widget(Paragraph::new(fill_lines), inner);
+
+    // Overlay "not enough space" centered vertically with 1-row margins
+    let msg_text = "  not enough space  ";
+    let blank = Line::from(" ".repeat(msg_text.len()));
+    let msg = Line::from(Span::styled(msg_text, theme::body()));
+    let text_y = (inner.y + inner.height / 2).saturating_sub(1);
+    let text_area = Rect::new(inner.x, text_y, inner.width, 3);
+    f.render_widget(
+        Paragraph::new(vec![blank.clone(), msg, blank]).alignment(Alignment::Center),
+        text_area,
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -64,24 +97,17 @@ fn render_nav(f: &mut Frame, app: &App, area: Rect) {
         })
         .collect();
 
-    // "1 Home · 2 About · 3 Portfolio · 4 Contact" + borders + padding
-    let tab_box_width = 52u16.min(area.width);
     let resume_url = "https://seanyang.me/resume";
-    let resume_box_width = (resume_url.len() as u16).min(area.width);
 
     let cols = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Length(tab_box_width),
-            Constraint::Min(1),
-            Constraint::Length(resume_box_width),
-        ])
+        .constraints([Constraint::Length(47), Constraint::Fill(1)])
         .split(area);
 
     let block = Block::default()
         .borders(Borders::ALL)
         .border_style(theme::secondary())
-        .title(Span::styled(" seanyang.me ", theme::primary()));
+        .title(Span::styled(" seanyang.me ", theme::secondary()));
 
     let tabs = Tabs::new(tab_titles)
         .block(block)
@@ -95,11 +121,12 @@ fn render_nav(f: &mut Frame, app: &App, area: Rect) {
     let resume_rows = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Length(1), Constraint::Min(1)])
-        .split(cols[2]);
+        .split(cols[1]);
     let resume = Paragraph::new(Line::from(vec![Span::styled(
         resume_url,
         theme::secondary().add_modifier(Modifier::UNDERLINED),
-    )]));
+    )]))
+    .alignment(Alignment::Right);
     f.render_widget(resume, resume_rows[1]);
 }
 

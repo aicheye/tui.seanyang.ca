@@ -21,6 +21,11 @@ pub const SOCIALS: &[Social] = &[
         handle: "aicheye",
     },
     Social {
+        name: "Bluesky",
+        url: "https://bsky.app/profile/seanyang.me",
+        handle: "seanyang.me",
+    },
+    Social {
         name: "Instagram",
         url: "https://instagram.com/seanyang_esports_gaming",
         handle: "seanyang_esports_gaming",
@@ -29,16 +34,6 @@ pub const SOCIALS: &[Social] = &[
         name: "Letterboxd",
         url: "https://letterboxd.com/aicheye",
         handle: "aicheye",
-    },
-    Social {
-        name: "Bluesky",
-        url: "https://bsky.app/profile/seanyang.me",
-        handle: "seanyang.me",
-    },
-    Social {
-        name: "Email",
-        url: "mailto:sean@seanyang.me",
-        handle: "sean@seanyang.me",
     },
 ];
 

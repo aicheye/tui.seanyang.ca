@@ -37,7 +37,6 @@ async fn main() {
         ..Default::default()
     };
 
-    tracing::info!("Listening on 0.0.0.0:{port}");
     let mut server = ChaiServer::<App>::new(port);
     server.run(config).await.expect("Server failed");
 }

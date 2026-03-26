@@ -5,7 +5,8 @@ use crate::input::{Key, parse_keys};
 use crate::section::SectionView;
 use crate::ui;
 use crate::ui::{
-    about::AboutSection, contact::ContactSection, home::HomeSection, portfolio::PortfolioSection,
+    experience::ExperienceSection, home::HomeSection, links::LinksSection,
+    projects::ProjectsSection,
 };
 
 /// Number of sections. Determines valid 1-N jump keys.
@@ -25,9 +26,9 @@ impl ChaiApp for App {
         Self {
             sections: [
                 Box::new(HomeSection::new()),
-                Box::new(AboutSection::new()),
-                Box::new(PortfolioSection::new()),
-                Box::new(ContactSection::new()),
+                Box::new(ExperienceSection::new()),
+                Box::new(ProjectsSection::new()),
+                Box::new(LinksSection::new()),
             ],
             active: 0,
             quit: false,
