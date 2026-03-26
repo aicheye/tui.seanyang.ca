@@ -7,7 +7,7 @@ ssh seanyang.me
 ssh tui.seanyang.me
 ```
 
-<img width="2486" height="1884" alt="image" src="https://github.com/user-attachments/assets/d252f450-5ae2-49f1-936e-b4e53b2fa505" />
+<img width="1015" height="727" alt="Screenshot From 2026-03-26 03-07-47" src="https://github.com/user-attachments/assets/f5ce9a13-dd25-4a8f-b770-a5a948410f30" />
 
 ## Deployment
 
