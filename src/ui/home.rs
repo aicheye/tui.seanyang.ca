@@ -111,7 +111,7 @@ fn render_wordmark(f: &mut Frame, area: Rect) {
 }
 
 fn render_location(f: &mut Frame, area: Rect) {
-    let right = "⦿ Waterloo, ON";
+    let right = "⦿ San Francisco, CA";
     let pad =
         (area.width as usize).saturating_sub(PRIMARY_EMAIL.chars().count() + right.chars().count());
     let line = Line::from(vec![
