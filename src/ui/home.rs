@@ -118,7 +118,7 @@ fn render_location(f: &mut Frame, area: Rect) {
         Span::styled(PRIMARY_EMAIL, theme::secondary()),
         Span::raw(" ".repeat(pad)),
         Span::styled("⦿ ", theme::primary()),
-        Span::styled("Waterloo, ON", theme::secondary()),
+        Span::styled("San Francisco, CA", theme::secondary()),
     ]);
     f.render_widget(Paragraph::new(line), area);
 }
