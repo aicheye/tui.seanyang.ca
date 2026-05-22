@@ -13,12 +13,12 @@ pub const JOBS: &[Job] = &[
     Job {
         title: "Robotics Perception Intern",
         company: "moss",
-        description: "perception for agbots",
+        description: "data gen/ml pipelines & firmware for agbots",
         website: "https://moss.ag",
         location: "San Francisco, CA",
         technologies: &[],
-        dates: &["inc. 2026.5"],
-        current: false,
+        dates: &["2026.5", "present"],
+        current: true,
     },
     Job {
         title: "Robotics SWE",
@@ -27,7 +27,7 @@ pub const JOBS: &[Job] = &[
         website: "https://watonomous.ca",
         location: "Waterloo, ON",
         technologies: &["C++", "ROS 2", "Docker", "Foxglove"],
-        dates: &["2025.9", "present"],
-        current: true,
+        dates: &["2025.9", "2026.4"],
+        current: false,
     },
 ];
