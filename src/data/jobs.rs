@@ -13,10 +13,10 @@ pub const JOBS: &[Job] = &[
     Job {
         title: "Robotics Perception Intern",
         company: "moss",
-        description: "data gen/ml pipelines & firmware for agbots",
+        description: "data gen, firmware, and autonomy for agbots",
         website: "https://moss.ag",
         location: "San Francisco, CA",
-        technologies: &[],
+        technologies: &["Rust", "ROS 2", "C++", "Linux"],
         dates: &["2026.5", "present"],
         current: true,
     },
