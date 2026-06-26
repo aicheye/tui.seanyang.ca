@@ -17,6 +17,10 @@ async fn main() {
         )
         .init();
 
+    // Pull the latest site content before accepting connections. Falls back to
+    // the bundled snapshot if the website is unreachable.
+    data::init().await;
+
     let key_path = std::env::var("SSH_HOST_KEY").unwrap_or_else(|_| "host_key".to_string());
     let host_key = load_host_keys(&key_path).expect("Failed to load host keys");
 

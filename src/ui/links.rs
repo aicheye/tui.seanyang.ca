@@ -8,7 +8,7 @@ use ratatui::{
 
 use super::theme;
 use crate::{
-    data::socials::{SOCIALS, Social},
+    data::{Social, snapshot},
     section::SectionView,
 };
 
@@ -39,7 +39,9 @@ impl SectionView for LinksSection {
 }
 
 fn render_links(f: &mut Frame, area: Rect) {
-    let mid = SOCIALS.len().div_ceil(2);
+    let data = snapshot();
+    let socials = &data.socials;
+    let mid = socials.len().div_ceil(2);
     let h = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
@@ -49,18 +51,18 @@ fn render_links(f: &mut Frame, area: Rect) {
         ])
         .split(area);
 
-    f.render_widget(Paragraph::new(link_lines(&SOCIALS[..mid])), h[0]);
-    f.render_widget(Paragraph::new(link_lines(&SOCIALS[mid..])), h[2]);
+    f.render_widget(Paragraph::new(link_lines(&socials[..mid])), h[0]);
+    f.render_widget(Paragraph::new(link_lines(&socials[mid..])), h[2]);
 }
 
-fn link_lines(socials: &'static [Social]) -> Vec<Line<'static>> {
+fn link_lines(socials: &[Social]) -> Vec<Line<'static>> {
     let mut lines: Vec<Line<'static>> = Vec::new();
     for s in socials {
-        let url = s.url.trim_start_matches("mailto:");
+        let url = s.url.trim_start_matches("mailto:").to_string();
         lines.push(Line::from(vec![
-            Span::styled(s.name, theme::green_bold()),
+            Span::styled(s.name.clone(), theme::green_bold()),
             Span::styled("  ·  ", theme::secondary()),
-            Span::styled(s.handle, theme::body()),
+            Span::styled(s.handle.clone(), theme::body()),
         ]));
         lines.push(Line::from(Span::styled(
             url,

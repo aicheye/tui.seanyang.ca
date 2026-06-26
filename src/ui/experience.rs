@@ -7,7 +7,7 @@ use ratatui::{
 };
 
 use super::theme;
-use crate::{data::jobs::JOBS, section::SectionView};
+use crate::{data::snapshot, section::SectionView};
 
 pub struct ExperienceSection;
 
@@ -36,9 +36,10 @@ impl SectionView for ExperienceSection {
 }
 
 fn render_timeline(f: &mut Frame, area: Rect) {
+    let data = snapshot();
     let mut lines: Vec<Line<'static>> = vec![];
 
-    for job in JOBS.iter() {
+    for job in data.jobs.iter() {
         let dot = if job.current { "●" } else { "○" };
         let dot_style = if job.current {
             theme::green_bold()
@@ -58,19 +59,19 @@ fn render_timeline(f: &mut Frame, area: Rect) {
             Span::raw("  "),
             Span::styled(dates, theme::secondary()),
             Span::raw(" ".repeat(header_pad)),
-            Span::styled(job.location, theme::body()),
+            Span::styled(job.location.clone(), theme::body()),
         ]));
 
         // │ title @ company                         website
-        let website = job.website.trim_end_matches('/');
+        let website = job.website.trim_end_matches('/').to_string();
         let left_w = 1 + 2 + job.title.chars().count() + 5 + job.company.chars().count();
         let pad = (area.width as usize).saturating_sub(left_w + website.chars().count());
         lines.push(Line::from(vec![
             pipe.clone(),
             Span::raw("  "),
-            Span::styled(job.title, theme::green_bold()),
+            Span::styled(job.title.clone(), theme::green_bold()),
             Span::styled("  @  ", theme::secondary()),
-            Span::styled(job.company, theme::green_bold()),
+            Span::styled(job.company.clone(), theme::green_bold()),
             Span::raw(" ".repeat(pad)),
             Span::styled(
                 website,
@@ -84,7 +85,7 @@ fn render_timeline(f: &mut Frame, area: Rect) {
         lines.push(Line::from(vec![
             pipe.clone(),
             Span::raw("  "),
-            Span::styled(job.description, theme::body()),
+            Span::styled(job.description.clone(), theme::body()),
         ]));
 
         // │  tech stack (if any)

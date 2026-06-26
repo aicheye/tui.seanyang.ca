@@ -1,0 +1,137 @@
+{
+  "adjectives": [
+    "robotics engineer",
+    "sustainable urbanist",
+    "democratic socialist",
+    "optimist"
+  ],
+  "jobs": [
+    {
+      "title": "Robotics Perception Intern",
+      "company": "moss",
+      "description": "autonomy, cv pipelines, and firmware for agbots",
+      "website": "https://moss.ag",
+      "location": "San Francisco, CA",
+      "technologies": ["ROS 2", "Rust", "C++", "Linux"],
+      "dates": ["2026.5", "present"],
+      "current": true
+    },
+    {
+      "title": "Robotics SWE",
+      "company": "WATonomous",
+      "description": "prediction pipelines for autonomous vehicles",
+      "website": "https://watonomous.ca/projects/eve",
+      "location": "Waterloo, ON",
+      "technologies": ["C++", "ROS 2", "Docker", "Foxglove"],
+      "dates": ["2025.9", "2026.4"],
+      "current": false
+    }
+  ],
+  "projects": [
+    {
+      "title": "swarm_ws",
+      "description": "robotic swarm maze exploration",
+      "github": "https://github.com/RRohan4/swarm_ws",
+      "technologies": ["Python", "ROS 2", "Docker"]
+    },
+    {
+      "title": "CRusTTY",
+      "description": "tui c interpreter from scratch",
+      "github": "https://github.com/aicheye/crustty",
+      "technologies": ["Rust", "C"]
+    },
+    {
+      "title": "Wunder RNN Challenge",
+      "description": "top 5% market prediction model",
+      "github": "https://github.com/aicheye/wundernn",
+      "technologies": ["Python", "ML", "Jupyter"]
+    },
+    {
+      "title": "aicheye's Combat Tagging",
+      "description": "minecraft mod w/ 1k+ downloads",
+      "github": "https://github.com/aicheye/combat-tag",
+      "technologies": ["Java", "Gradle"]
+    },
+    {
+      "title": "Bucket",
+      "description": "intuitive student dashboard",
+      "github": "https://github.com/aicheye/bucket",
+      "technologies": ["TypeScript", "React", "GraphQL"]
+    },
+    {
+      "title": "ezp2p Arcade",
+      "description": "p2p serverless minigames",
+      "github": "https://github.com/aicheye/ezp2p",
+      "technologies": ["TypeScript", "Vite", "WebRTC"]
+    }
+  ],
+  "quotes": [
+    {
+      "text": "If you can't fly then run, if you can't run then walk, if you can't walk then crawl, but whatever you do you have to keep moving forward.",
+      "author": "Martin Luther King Jr."
+    },
+    {
+      "text": "Only a life lived for others is a life worthwhile.",
+      "author": "Albert Einstein"
+    },
+    {
+      "text": "If not us, who? If not now, when?",
+      "author": "John F. Kennedy"
+    },
+    {
+      "text": "To the mind that is still, the whole universe surrenders.",
+      "author": "Lao Tzu"
+    },
+    {
+      "text": "I am afraid. Not of life, or death, or nothingness, but of wasting it as if I had never been.",
+      "author": "Daniel Keyes"
+    },
+    {
+      "text": "I thank whatever gods may be for my unconquerable soul.",
+      "author": "William Ernest Henley"
+    },
+    {
+      "text": "This too shall pass.",
+      "author": "Persian adage"
+    },
+    {
+      "text": "In the midst of winter, I found there was, within me, an invincible summer.",
+      "author": "Albert Camus"
+    },
+    {
+      "text": "Do not go gentle into that good night. Rage, rage against the dying of the light.",
+      "author": "Dylan Thomas"
+    },
+    {
+      "text": "Don't tell me the sky's the limit when there are footprints on the moon.",
+      "author": "Paul Brandt"
+    },
+    {
+      "text": "And you ask, 'What if I fall?' Oh, but my darling, what if you fly?",
+      "author": "Erin Hanson"
+    },
+    {
+      "text": "The future belongs to those who believe in the beauty of their dreams.",
+      "author": "Eleanor Roosevelt"
+    },
+    {
+      "text": "Wherever you go, there you are.",
+      "author": "Thomas à Kempis"
+    },
+    {
+      "text": "The wound is the place where the light enters you.",
+      "author": "Rumi"
+    }
+  ],
+  "primaryEmail": {
+    "label": "sean@seanyang.me"
+  },
+  "socials": [
+    { "name": "GitHub", "url": "https://github.com/aicheye", "handle": "aicheye" },
+    { "name": "LinkedIn", "url": "https://linkedin.com/in/syang07", "handle": "syang07" },
+    { "name": "Twitter / X", "url": "https://x.com/aicheye", "handle": "aicheye" },
+    { "name": "Bluesky", "url": "https://bsky.app/profile/seanyang.me", "handle": "seanyang.me" },
+    { "name": "Instagram", "url": "https://instagram.com/seanyang_esports_gaming", "handle": "seanyang_esports_gaming" },
+    { "name": "Letterboxd", "url": "https://letterboxd.com/aicheye", "handle": "aicheye" }
+  ]
+}
