@@ -10,6 +10,12 @@ services:
       - RUST_LOG=info
       - SSH_HOST_KEY=/data/host_key
     restart: unless-stopped
+    cap_add:
+      - IPC_LOCK
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
 
 volumes:
   ssh-host-key:
