@@ -20,7 +20,11 @@ use super::model::{Job, Project, Quote, SiteData, SocialsDoc};
 const MIN_REFRESH_INTERVAL_SECS: u64 = 60;
 
 /// Default base URL for the JSON data, overridable via `SITE_DATA_URL`.
-const DEFAULT_BASE_URL: &str = "https://seanyang.me/data";
+///
+/// Served from jsDelivr (the same `public/data/*.json` files committed to the
+/// website repo) rather than `seanyang.me` directly, since the site sits behind
+/// Vercel's bot challenge which blocks non-browser clients.
+const DEFAULT_BASE_URL: &str = "https://cdn.jsdelivr.net/gh/aicheye/seanyang.me@main/public/data";
 
 /// Per-request timeout for data fetches.
 const FETCH_TIMEOUT_SECS: u64 = 10;

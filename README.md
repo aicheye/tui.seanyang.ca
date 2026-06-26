@@ -85,16 +85,18 @@ All configuration is done via environment variables:
 |---|---|---|
 | `SSH_ADDR` | `0.0.0.0:2222` | Address and port the SSH server binds to inside the container |
 | `SSH_HOST_KEY` | `/data/host_key` | Path to the Ed25519 host key (auto-generated on first run) |
-| `SITE_DATA_URL` | `https://seanyang.me/data` | Base URL the content (jobs, projects, quotes, socials, adjectives) is fetched from |
+| `SITE_DATA_URL` | `https://cdn.jsdelivr.net/gh/aicheye/seanyang.me@main/public/data` | Base URL the content (jobs, projects, quotes, socials, adjectives) is fetched from |
 | `RUST_LOG` | `info` | Log level filter (`trace`, `debug`, `info`, `warn`, `error`) |
 
 ### Content
 
-The page content is pulled at runtime over HTTP from the website
-(`SITE_DATA_URL`), which serves it as JSON from `public/data/` — the single
-source of truth shared with the web frontend. Content is refreshed on each SSH
-connection, rate-limited to one pull per minute. A bundled snapshot keeps the
-TUI fully functional if the site is unreachable.
+The page content is pulled at runtime over HTTP from `SITE_DATA_URL`. The
+canonical JSON lives in the website repo under `public/data/` (the single source
+of truth shared with the web frontend); it's served via jsDelivr by default,
+since `seanyang.me` itself sits behind Vercel's bot challenge which blocks
+non-browser clients. Content is refreshed on each SSH connection, rate-limited to
+one pull per minute. A bundled snapshot keeps the TUI fully functional if the
+source is unreachable.
 
 ### Persisting the Host Key
 
