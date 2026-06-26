@@ -9,8 +9,7 @@ use ratatui::{
 
 use super::theme;
 use crate::{
-    data::quotes::{QUOTES, Quote},
-    data::socials::PRIMARY_EMAIL,
+    data::{SiteData, snapshot},
     input::Key,
     section::SectionView,
 };
@@ -45,20 +44,27 @@ const TERM_MARKS: &[u64] = &[
 ];
 
 pub struct HomeSection {
+    /// Shuffled indices into the current quote list.
     order: Vec<usize>,
     cursor: usize,
 }
 
 impl HomeSection {
     pub fn new() -> Self {
-        let mut rng = rand::thread_rng();
-        let mut order: Vec<usize> = (0..QUOTES.len()).collect();
-        order.shuffle(&mut rng);
-        Self { order, cursor: 0 }
+        let mut section = Self {
+            order: Vec::new(),
+            cursor: 0,
+        };
+        section.reshuffle(snapshot().quotes.len());
+        section
     }
 
-    fn current_quote(&self) -> &'static Quote {
-        &QUOTES[self.order[self.cursor]]
+    /// Rebuild the shuffled order for `n` quotes and reset the cursor.
+    fn reshuffle(&mut self, n: usize) {
+        let mut order: Vec<usize> = (0..n).collect();
+        order.shuffle(&mut rand::thread_rng());
+        self.order = order;
+        self.cursor = 0;
     }
 }
 
@@ -68,6 +74,9 @@ impl SectionView for HomeSection {
     }
 
     fn handle_key(&mut self, key: Key) {
+        if self.order.is_empty() {
+            return;
+        }
         match key {
             Key::Right | Key::Char('l') | Key::Char('n') => {
                 self.cursor = (self.cursor + 1) % self.order.len();
@@ -79,7 +88,17 @@ impl SectionView for HomeSection {
         }
     }
 
+    fn update(&mut self) {
+        // Re-sync the shuffle order if the quote list changed after a refresh.
+        let n = snapshot().quotes.len();
+        if self.order.len() != n {
+            self.reshuffle(n);
+        }
+    }
+
     fn render(&self, f: &mut Frame, area: Rect) {
+        let data = snapshot();
+
         let chunks = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
@@ -96,10 +115,10 @@ impl SectionView for HomeSection {
             .split(area);
 
         render_wordmark(f, chunks[1]);
-        render_location(f, chunks[2]);
-        render_tagline(f, chunks[4]);
+        render_location(f, chunks[2], &data.primary_email.label);
+        render_tagline(f, chunks[4], &data.adjectives);
         render_progress(f, chunks[6]);
-        render_quote(f, self, chunks[8]);
+        render_quote(f, self, &data, chunks[8]);
     }
 }
 
@@ -110,12 +129,11 @@ fn render_wordmark(f: &mut Frame, area: Rect) {
     f.render_widget(p, area);
 }
 
-fn render_location(f: &mut Frame, area: Rect) {
+fn render_location(f: &mut Frame, area: Rect, email: &str) {
     let right = "⦿ San Francisco, CA";
-    let pad =
-        (area.width as usize).saturating_sub(PRIMARY_EMAIL.chars().count() + right.chars().count());
+    let pad = (area.width as usize).saturating_sub(email.chars().count() + right.chars().count());
     let line = Line::from(vec![
-        Span::styled(PRIMARY_EMAIL, theme::secondary()),
+        Span::styled(email.to_string(), theme::secondary()),
         Span::raw(" ".repeat(pad)),
         Span::styled("⦿ ", theme::primary()),
         Span::styled("San Francisco, CA", theme::secondary()),
@@ -123,19 +141,17 @@ fn render_location(f: &mut Frame, area: Rect) {
     f.render_widget(Paragraph::new(line), area);
 }
 
-fn render_tagline(f: &mut Frame, area: Rect) {
-    let line = Line::from(vec![
-        Span::styled("[  ", theme::green()),
-        Span::styled("robotics engineer", theme::body()),
-        Span::styled(" · ", theme::green()),
-        Span::styled("sustainable urbanist", theme::body()),
-        Span::styled(" · ", theme::green()),
-        Span::styled("democratic socialist", theme::body()),
-        Span::styled(" · ", theme::green()),
-        Span::styled("optimist", theme::body()),
-        Span::styled("  ]", theme::green()),
-    ]);
-    let p = Paragraph::new(line).alignment(Alignment::Center);
+fn render_tagline(f: &mut Frame, area: Rect, adjectives: &[String]) {
+    let mut spans: Vec<Span<'static>> = vec![Span::styled("[  ", theme::green())];
+    for (i, adj) in adjectives.iter().enumerate() {
+        if i > 0 {
+            spans.push(Span::styled(" · ", theme::green()));
+        }
+        spans.push(Span::styled(adj.clone(), theme::body()));
+    }
+    spans.push(Span::styled("  ]", theme::green()));
+
+    let p = Paragraph::new(Line::from(spans)).alignment(Alignment::Center);
     f.render_widget(p, area);
 }
 
@@ -207,9 +223,14 @@ fn render_progress(f: &mut Frame, area: Rect) {
     f.render_widget(Paragraph::new(vec![label, bar]), area);
 }
 
-fn render_quote(f: &mut Frame, section: &HomeSection, area: Rect) {
-    let quote = section.current_quote();
-    let index_label = format!("{} / {}", section.cursor + 1, section.order.len());
+fn render_quote(f: &mut Frame, section: &HomeSection, data: &SiteData, area: Rect) {
+    if data.quotes.is_empty() {
+        return;
+    }
+    let idx = section.order.get(section.cursor).copied().unwrap_or(0) % data.quotes.len();
+    let quote = &data.quotes[idx];
+    let total = section.order.len().max(1);
+    let index_label = format!("{} / {}", section.cursor + 1, total);
 
     // Manual word-wrap so every visual line gets its own │ prefix.
     let prefix_w = 3usize; // "│  "
@@ -236,7 +257,7 @@ fn render_quote(f: &mut Frame, section: &HomeSection, area: Rect) {
         Span::styled("│", theme::secondary()),
         Span::raw("  "),
         Span::styled("— ", theme::secondary()),
-        Span::styled(quote.author, theme::green_bold()),
+        Span::styled(quote.author.clone(), theme::green_bold()),
         Span::styled(format!("  ({index_label})  "), theme::secondary()),
         Span::styled("←/→", theme::primary()),
         Span::styled(" prev/next", theme::secondary()),

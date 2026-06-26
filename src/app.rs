@@ -35,6 +35,12 @@ impl ChaiApp for App {
         }
     }
 
+    fn on_connect(&mut self, _username: &str) {
+        // Refresh site content on every connection, rate-limited to one pull
+        // per minute (see `data::refresh_if_stale`).
+        crate::data::refresh_if_stale();
+    }
+
     fn update(&mut self) {
         self.sections[self.active].update();
     }

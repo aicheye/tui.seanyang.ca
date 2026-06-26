@@ -7,7 +7,10 @@ use ratatui::{
 };
 
 use super::theme;
-use crate::{data::projects::PROJECTS, section::SectionView};
+use crate::{
+    data::{Project, snapshot},
+    section::SectionView,
+};
 
 const COLS: usize = 2;
 const CARD_H: u16 = 5; // 4 content lines + 1 padding
@@ -39,7 +42,9 @@ impl SectionView for ProjectsSection {
 }
 
 fn render_grid(f: &mut Frame, area: Rect) {
-    let row_count = PROJECTS.len().div_ceil(COLS);
+    let data = snapshot();
+    let projects = &data.projects;
+    let row_count = projects.len().div_ceil(COLS);
 
     let mut v_constraints = vec![];
     for _ in 0..row_count {
@@ -52,7 +57,7 @@ fn render_grid(f: &mut Frame, area: Rect) {
         .constraints(v_constraints)
         .split(area);
 
-    for (row_idx, chunk) in PROJECTS.chunks(COLS).enumerate() {
+    for (row_idx, chunk) in projects.chunks(COLS).enumerate() {
         let row_area = v_rows[row_idx];
         let h_cols = Layout::default()
             .direction(Direction::Horizontal)
@@ -69,14 +74,19 @@ fn render_grid(f: &mut Frame, area: Rect) {
     }
 }
 
-fn render_card(f: &mut Frame, p: &crate::data::projects::Project, area: Rect) {
-    let lang_str = p.languages.join(" · ");
-    let url = p.github.map(|u| u.trim_end_matches('/')).unwrap_or("");
+fn render_card(f: &mut Frame, p: &Project, area: Rect) {
+    let tech_str = p.technologies.join(" · ");
+    let url = p
+        .github
+        .as_deref()
+        .map(|u| u.trim_end_matches('/'))
+        .unwrap_or("")
+        .to_string();
 
     let lines: Vec<Line<'static>> = vec![
-        Line::from(vec![Span::styled(p.title, theme::green_bold())]),
-        Line::from(vec![Span::styled(p.description, theme::body())]),
-        Line::from(vec![Span::styled(lang_str, theme::secondary())]),
+        Line::from(vec![Span::styled(p.title.clone(), theme::green_bold())]),
+        Line::from(vec![Span::styled(p.description.clone(), theme::body())]),
+        Line::from(vec![Span::styled(tech_str, theme::secondary())]),
         Line::from(vec![Span::styled(
             url,
             Style::default()
