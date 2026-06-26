@@ -115,7 +115,7 @@ impl SectionView for HomeSection {
             .split(area);
 
         render_wordmark(f, chunks[1]);
-        render_location(f, chunks[2], &data.primary_email);
+        render_location(f, chunks[2], &data.primary_email.label);
         render_tagline(f, chunks[4], &data.adjectives);
         render_progress(f, chunks[6]);
         render_quote(f, self, &data, chunks[8]);

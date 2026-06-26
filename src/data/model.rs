@@ -62,5 +62,5 @@ pub struct SiteData {
     pub projects: Vec<Project>,
     pub quotes: Vec<Quote>,
     pub socials: Vec<Social>,
-    pub primary_email: String,
+    pub primary_email: PrimaryEmail,
 }

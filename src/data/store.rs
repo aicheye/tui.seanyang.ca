@@ -135,7 +135,7 @@ async fn fetch_all(base: String) -> anyhow::Result<SiteData> {
         projects,
         quotes,
         socials: socials.socials,
-        primary_email: socials.primary_email.label,
+        primary_email: socials.primary_email,
     })
 }
 

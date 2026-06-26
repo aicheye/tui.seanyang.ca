@@ -30,7 +30,7 @@ pub fn fallback() -> SiteData {
         projects: doc.projects,
         quotes: doc.quotes,
         socials: doc.socials,
-        primary_email: doc.primary_email.label,
+        primary_email: doc.primary_email,
     }
 }
 
@@ -46,6 +46,6 @@ mod tests {
         assert!(!data.projects.is_empty());
         assert!(!data.quotes.is_empty());
         assert!(!data.socials.is_empty());
-        assert!(!data.primary_email.is_empty());
+        assert!(!data.primary_email.label.is_empty());
     }
 }
