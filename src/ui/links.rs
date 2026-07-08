@@ -46,7 +46,7 @@ fn render_links(f: &mut Frame, area: Rect) {
         .constraints([
             Constraint::Fill(1),
             Constraint::Length(3), // gap
-            Constraint::Length(45),
+            Constraint::Fill(1),
         ])
         .split(area);
 
