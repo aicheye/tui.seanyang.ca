@@ -2,6 +2,8 @@ pub mod experience;
 pub mod home;
 mod hyperlink;
 pub mod links;
+#[cfg(test)]
+mod osc8_probe;
 pub mod projects;
 pub mod theme;
 
