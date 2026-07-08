@@ -3,10 +3,9 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Modifier, Style},
     text::{Line, Span},
-    widgets::{Paragraph, Wrap},
 };
 
-use super::theme;
+use super::{hyperlink::Hyperlink, theme};
 use crate::{data::snapshot, section::SectionView};
 
 pub struct ExperienceSection;
@@ -37,9 +36,20 @@ impl SectionView for ExperienceSection {
 
 fn render_timeline(f: &mut Frame, area: Rect) {
     let data = snapshot();
-    let mut lines: Vec<Line<'static>> = vec![];
+    let bottom = area.y + area.height;
+    let mut y = area.y;
+
+    let render_row = |f: &mut Frame, y: u16, line: Line<'static>| {
+        if y < bottom {
+            f.render_widget(line, Rect::new(area.x, y, area.width, 1));
+        }
+    };
 
     for job in data.jobs.iter() {
+        if y >= bottom {
+            break;
+        }
+
         let dot = if job.current { "●" } else { "○" };
         let dot_style = if job.current {
             theme::green_bold()
@@ -54,55 +64,81 @@ fn render_timeline(f: &mut Frame, area: Rect) {
         let header_left_w = 1 + 2 + dates.chars().count();
         let header_pad =
             (area.width as usize).saturating_sub(header_left_w + job.location.chars().count());
-        lines.push(Line::from(vec![
-            Span::styled(dot, dot_style),
-            Span::raw("  "),
-            Span::styled(dates, theme::secondary()),
-            Span::raw(" ".repeat(header_pad)),
-            Span::styled(job.location.clone(), theme::body()),
-        ]));
+        render_row(
+            f,
+            y,
+            Line::from(vec![
+                Span::styled(dot, dot_style),
+                Span::raw("  "),
+                Span::styled(dates, theme::secondary()),
+                Span::raw(" ".repeat(header_pad)),
+                Span::styled(job.location.clone(), theme::body()),
+            ]),
+        );
+        y += 1;
 
         // │ title @ company                         website
         let website = job.website.trim_end_matches('/').to_string();
+        let display = website
+            .trim_start_matches("https://")
+            .trim_start_matches("http://");
         let left_w = 1 + 2 + job.title.chars().count() + 5 + job.company.chars().count();
-        let pad = (area.width as usize).saturating_sub(left_w + website.chars().count());
-        lines.push(Line::from(vec![
-            pipe.clone(),
-            Span::raw("  "),
-            Span::styled(job.title.clone(), theme::green_bold()),
-            Span::styled("  @  ", theme::secondary()),
-            Span::styled(job.company.clone(), theme::green_bold()),
-            Span::raw(" ".repeat(pad)),
-            Span::styled(
-                website,
-                Style::default()
-                    .fg(theme::MUTED)
-                    .add_modifier(Modifier::UNDERLINED),
-            ),
-        ]));
+        let pad = (area.width as usize).saturating_sub(left_w + display.chars().count());
+        if y < bottom {
+            f.render_widget(
+                Line::from(vec![
+                    pipe.clone(),
+                    Span::raw("  "),
+                    Span::styled(job.title.clone(), theme::green_bold()),
+                    Span::styled("  @  ", theme::secondary()),
+                    Span::styled(job.company.clone(), theme::green_bold()),
+                    Span::raw(" ".repeat(pad)),
+                ]),
+                Rect::new(area.x, y, area.width, 1),
+            );
+            let link_x = area.x + (left_w + pad).min(area.width as usize) as u16;
+            let link_w = area.width.saturating_sub(link_x - area.x);
+            let style = Style::default()
+                .fg(theme::MUTED)
+                .add_modifier(Modifier::UNDERLINED);
+            f.render_widget(
+                Hyperlink::new(Span::styled(display, style), &website),
+                Rect::new(link_x, y, link_w, 1),
+            );
+        }
+        y += 1;
 
         // │  description
-        lines.push(Line::from(vec![
-            pipe.clone(),
-            Span::raw("  "),
-            Span::styled(job.description.clone(), theme::body()),
-        ]));
+        render_row(
+            f,
+            y,
+            Line::from(vec![
+                pipe.clone(),
+                Span::raw("  "),
+                Span::styled(job.description.clone(), theme::body()),
+            ]),
+        );
+        y += 1;
 
         // │  tech stack (if any)
         if !job.technologies.is_empty() {
             let tech = job.technologies.join(" · ");
-            lines.push(Line::from(vec![
-                pipe.clone(),
-                Span::raw("  "),
-                Span::styled(tech, theme::secondary()),
-            ]));
+            render_row(
+                f,
+                y,
+                Line::from(vec![
+                    pipe.clone(),
+                    Span::raw("  "),
+                    Span::styled(tech, theme::secondary()),
+                ]),
+            );
+            y += 1;
         }
 
         // trailing pipes
-        lines.push(Line::from(vec![pipe.clone()]));
-        lines.push(Line::from(vec![pipe.clone()]));
+        render_row(f, y, Line::from(vec![pipe.clone()]));
+        y += 1;
+        render_row(f, y, Line::from(vec![pipe.clone()]));
+        y += 1;
     }
-
-    let p = Paragraph::new(lines).wrap(Wrap { trim: true });
-    f.render_widget(p, area);
 }

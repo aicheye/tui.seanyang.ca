@@ -14,6 +14,7 @@ use ratatui::{
 };
 
 use crate::app::App;
+use hyperlink::Hyperlink;
 
 /// Top-level render: draws the chrome (nav bar + footer) then delegates to
 /// the active section renderer.
@@ -99,6 +100,9 @@ fn render_nav(f: &mut Frame, app: &App, area: Rect) {
         .collect();
 
     let resume_url = "https://seanyang.me/resume";
+    let resume_display = resume_url
+        .trim_start_matches("https://")
+        .trim_start_matches("http://");
 
     let cols = Layout::default()
         .direction(Direction::Horizontal)
@@ -123,12 +127,19 @@ fn render_nav(f: &mut Frame, app: &App, area: Rect) {
         .direction(Direction::Vertical)
         .constraints([Constraint::Length(1), Constraint::Min(1)])
         .split(cols[1]);
-    let resume = Paragraph::new(Line::from(vec![Span::styled(
-        resume_url,
-        theme::secondary().add_modifier(Modifier::UNDERLINED),
-    )]))
-    .alignment(Alignment::Right);
-    f.render_widget(resume, resume_rows[1]);
+    let link_area = resume_rows[1];
+    let link_w = (resume_display.chars().count() as u16).min(link_area.width);
+    let link_x = link_area.x + link_area.width - link_w;
+    f.render_widget(
+        Hyperlink::new(
+            Span::styled(
+                resume_display,
+                theme::secondary().add_modifier(Modifier::UNDERLINED),
+            ),
+            resume_url,
+        ),
+        Rect::new(link_x, link_area.y, link_w, 1),
+    );
 }
 
 fn render_footer(f: &mut Frame, area: Rect) {
