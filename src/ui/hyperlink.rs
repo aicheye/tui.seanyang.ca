@@ -4,20 +4,6 @@
 //! Ratatui's buffer is cell-based and doesn't understand escape sequences, so
 //! this follows ratatui's own `hyperlink` example: render the visible text
 //! normally, then smuggle the OSC 8 codes back in by rewriting cell symbols.
-//!
-//! Two visible characters are packed per rewritten cell rather than one. This
-//! isn't arbitrary: `Buffer::diff` measures a cell's on-screen width from its
-//! symbol string, and control characters like ESC/BEL have zero width under
-//! `unicode-width` — so a cell holding `open + "gi" + close` reports a width
-//! equal to the (very long, mostly-invisible) URL text plus 2. Any width > 1
-//! makes `diff` treat the next logical cell as a wide-character continuation
-//! and skip sending it to the terminal at all. Packing one char per cell
-//! (as a naive first/last-cell-only approach does) triggers that same skip
-//! but leaves a real, unsent visible character behind it, silently dropping
-//! it. Packing two real characters per rewritten cell means the "skipped"
-//! cell never held unique information to begin with — it was already
-//! included in the pair — so nothing is lost. No extra crate needed: a
-//! `Cell`'s symbol can hold an arbitrary string.
 
 use ratatui::{buffer::Buffer, layout::Rect, text::Line, widgets::Widget};
 
@@ -89,8 +75,7 @@ mod tests {
         );
 
         // Odd cells are never sent by Buffer::diff (the preceding wide cell
-        // covers them), so they stay at TestBackend's initial blank state —
-        // that's the mechanism this widget relies on, not a bug.
+        // covers them), so they stay at TestBackend's initial blank state
         assert_eq!(buf.cell((1, 0)).unwrap().symbol(), " ");
 
         // Nothing past the visible text was touched.
