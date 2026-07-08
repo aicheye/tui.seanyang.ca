@@ -5,6 +5,10 @@
 //! so the escape codes ride along on the first and last visible cell without
 //! changing how many cells the widget occupies — the displayed text can
 //! differ from (and be shorter than) the URL it links to.
+//!
+//! Terminated with BEL (`\x07`) rather than ST (`ESC \`): several terminals
+//! (and SSH clients relaying to them) mis-parse the two-byte ST form and leak
+//! or drop characters right at the boundary, which BEL avoids.
 
 use ratatui::{buffer::Buffer, layout::Rect, text::Span, widgets::Widget};
 
@@ -30,8 +34,8 @@ impl Widget for Hyperlink<'_> {
         }
         buf.set_span(area.x, area.y, &self.text, width);
 
-        let open = format!("\x1b]8;;{}\x1b\\", self.url);
-        let close = "\x1b]8;;\x1b\\";
+        let open = format!("\x1b]8;;{}\x07", self.url);
+        let close = "\x1b]8;;\x07";
         let last_x = area.x + width - 1;
 
         if last_x == area.x {
@@ -78,8 +82,8 @@ mod tests {
             .unwrap()
             .symbol();
 
-        assert!(first.starts_with("\x1b]8;;https://github.com/aicheye\x1b\\g"));
-        assert_eq!(last, "e\x1b]8;;\x1b\\");
+        assert!(first.starts_with("\x1b]8;;https://github.com/aicheye\x07g"));
+        assert_eq!(last, "e\x1b]8;;\x07");
 
         // The cell right after the visible text must be untouched (still a
         // plain space), proving the widget didn't widen past its real width.
