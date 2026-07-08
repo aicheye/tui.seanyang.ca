@@ -1,24 +1,6 @@
 //! A clickable-in-terminal link widget using the OSC 8 escape sequence
 //! (supported by iTerm2, kitty, WezTerm, Windows Terminal, and others).
 //!
-//! Ratatui's buffer is cell-based and doesn't understand escape sequences, so
-//! the visible text is rendered normally and the OSC 8 codes are smuggled back
-//! in by rewriting cell symbols. Unlike ratatui's `hyperlink` example (which
-//! splits the link into two-character chunks, each with its own escape
-//! sequence), the whole link goes into the *first* cell as a single OSC 8
-//! region and the remaining cells are flagged with `skip`:
-//!
-//! - One OSC 8 region per link means terminals treat it as one link (separate
-//!   regions per chunk show up as several adjacent links with broken hover
-//!   highlighting).
-//! - `Buffer::diff` measures a cell by the unicode width of its symbol, and
-//!   the escape sequence's URL bytes are printable, so a rewritten cell looks
-//!   dozens of columns wide. With chunks, that inflated width suppressed the
-//!   update of whichever cell followed a chunk, leaving stale characters from
-//!   the previous frame on screen after the end of odd-length links. Skipped
-//!   cells are never diffed or emitted, so the single rewritten cell is the
-//!   only place the accounting has to be right.
-//!
 //! The text is expected to be styled uniformly: the terminal renders all of it
 //! with the first cell's style.
 
