@@ -6,7 +6,7 @@ use ratatui::{
     widgets::Paragraph,
 };
 
-use super::theme;
+use super::{hyperlink::Hyperlink, theme};
 use crate::{
     data::{Project, snapshot},
     section::SectionView,
@@ -76,25 +76,25 @@ fn render_grid(f: &mut Frame, area: Rect) {
 
 fn render_card(f: &mut Frame, p: &Project, area: Rect) {
     let tech_str = p.technologies.join(" · ");
-    let url = p
-        .github
-        .as_deref()
-        .map(|u| u.trim_end_matches('/'))
-        .unwrap_or("")
-        .to_string();
+    let url = p.github.as_deref().map(|u| u.trim_end_matches('/'));
 
     let lines: Vec<Line<'static>> = vec![
         Line::from(vec![Span::styled(p.title.clone(), theme::green_bold())]),
         Line::from(vec![Span::styled(p.description.clone(), theme::body())]),
         Line::from(vec![Span::styled(tech_str, theme::secondary())]),
-        Line::from(vec![Span::styled(
-            url,
-            Style::default()
-                .fg(theme::MUTED)
-                .add_modifier(Modifier::UNDERLINED),
-        )]),
-        Line::from(""),
     ];
-
     f.render_widget(Paragraph::new(lines), area);
+
+    if let Some(url) = url {
+        let display = url
+            .trim_start_matches("https://")
+            .trim_start_matches("http://");
+        let style = Style::default()
+            .fg(theme::MUTED)
+            .add_modifier(Modifier::UNDERLINED);
+        f.render_widget(
+            Hyperlink::new(Span::styled(display, style), url),
+            Rect::new(area.x, area.y + 3, area.width, 1),
+        );
+    }
 }

@@ -3,10 +3,9 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Modifier, Style},
     text::{Line, Span},
-    widgets::Paragraph,
 };
 
-use super::theme;
+use super::{hyperlink::Hyperlink, theme};
 use crate::{
     data::{Social, snapshot},
     section::SectionView,
@@ -51,27 +50,42 @@ fn render_links(f: &mut Frame, area: Rect) {
         ])
         .split(area);
 
-    f.render_widget(Paragraph::new(link_lines(&socials[..mid])), h[0]);
-    f.render_widget(Paragraph::new(link_lines(&socials[mid..])), h[2]);
+    render_column(f, h[0], &socials[..mid]);
+    render_column(f, h[2], &socials[mid..]);
 }
 
-fn link_lines(socials: &[Social]) -> Vec<Line<'static>> {
-    let mut lines: Vec<Line<'static>> = Vec::new();
-    for s in socials {
-        let url = s.url.trim_start_matches("mailto:").to_string();
-        lines.push(Line::from(vec![
-            Span::styled(s.name.clone(), theme::green_bold()),
-            Span::styled("  ·  ", theme::secondary()),
-            Span::styled(s.handle.clone(), theme::body()),
-        ]));
-        lines.push(Line::from(Span::styled(
-            url,
-            Style::default()
+/// Height in rows of one social entry: title/handle, url, and a blank gap.
+const ENTRY_HEIGHT: u16 = 4;
+
+fn render_column(f: &mut Frame, area: Rect, socials: &[Social]) {
+    for (i, s) in socials.iter().enumerate() {
+        let y = area.y + i as u16 * ENTRY_HEIGHT;
+        if y >= area.y + area.height {
+            break;
+        }
+
+        f.render_widget(
+            Line::from(vec![
+                Span::styled(s.label.clone(), theme::green_bold()),
+                Span::styled("  ·  ", theme::secondary()),
+                Span::styled(s.handle.clone(), theme::body()),
+            ]),
+            Rect::new(area.x, y, area.width, 1),
+        );
+
+        if y + 1 < area.y + area.height {
+            let display = s
+                .url
+                .trim_start_matches("https://")
+                .trim_start_matches("http://")
+                .trim_start_matches("mailto:");
+            let style = Style::default()
                 .fg(theme::MUTED)
-                .add_modifier(Modifier::UNDERLINED),
-        )));
-        lines.push(Line::from(""));
-        lines.push(Line::from(""));
+                .add_modifier(Modifier::UNDERLINED);
+            f.render_widget(
+                Hyperlink::new(Span::styled(display, style), &s.url),
+                Rect::new(area.x, y + 1, area.width, 1),
+            );
+        }
     }
-    lines
 }

@@ -1,8 +1,8 @@
 //! Owned data models, deserialized from the website's JSON.
 //!
 //! The website serves a strict superset of what the TUI needs (e.g. job
-//! `logo`s, social `label`s) — serde simply ignores the extra fields, so the
-//! TUI only declares what it renders.
+//! `logo`s) — serde simply ignores the extra fields, so the TUI only
+//! declares what it renders.
 
 use serde::Deserialize;
 
@@ -35,7 +35,7 @@ pub struct Quote {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Social {
-    pub name: String,
+    pub label: String,
     pub url: String,
     pub handle: String,
 }
