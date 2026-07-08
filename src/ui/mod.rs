@@ -1,5 +1,6 @@
 pub mod experience;
 pub mod home;
+mod hyperlink;
 pub mod links;
 pub mod projects;
 pub mod theme;
