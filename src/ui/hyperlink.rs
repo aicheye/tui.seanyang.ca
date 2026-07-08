@@ -1,24 +1,33 @@
 //! A clickable-in-terminal link widget using the OSC 8 escape sequence
 //! (supported by iTerm2, kitty, WezTerm, Windows Terminal, and others).
 //!
-//! No extra crate is needed: a `Cell`'s symbol can hold an arbitrary string,
-//! so the escape codes ride along on the first and last visible cell without
-//! changing how many cells the widget occupies — the displayed text can
-//! differ from (and be shorter than) the URL it links to.
+//! Ratatui's buffer is cell-based and doesn't understand escape sequences, so
+//! this follows ratatui's own `hyperlink` example: render the visible text
+//! normally, then smuggle the OSC 8 codes back in by rewriting cell symbols.
 //!
-//! Terminated with BEL (`\x07`) rather than ST (`ESC \`): several terminals
-//! (and SSH clients relaying to them) mis-parse the two-byte ST form and leak
-//! or drop characters right at the boundary, which BEL avoids.
+//! Two visible characters are packed per rewritten cell rather than one. This
+//! isn't arbitrary: `Buffer::diff` measures a cell's on-screen width from its
+//! symbol string, and control characters like ESC/BEL have zero width under
+//! `unicode-width` — so a cell holding `open + "gi" + close` reports a width
+//! equal to the (very long, mostly-invisible) URL text plus 2. Any width > 1
+//! makes `diff` treat the next logical cell as a wide-character continuation
+//! and skip sending it to the terminal at all. Packing one char per cell
+//! (as a naive first/last-cell-only approach does) triggers that same skip
+//! but leaves a real, unsent visible character behind it, silently dropping
+//! it. Packing two real characters per rewritten cell means the "skipped"
+//! cell never held unique information to begin with — it was already
+//! included in the pair — so nothing is lost. No extra crate needed: a
+//! `Cell`'s symbol can hold an arbitrary string.
 
-use ratatui::{buffer::Buffer, layout::Rect, text::Span, widgets::Widget};
+use ratatui::{buffer::Buffer, layout::Rect, text::Line, widgets::Widget};
 
 pub struct Hyperlink<'a> {
-    text: Span<'a>,
+    text: Line<'a>,
     url: &'a str,
 }
 
 impl<'a> Hyperlink<'a> {
-    pub fn new(text: impl Into<Span<'a>>, url: &'a str) -> Self {
+    pub fn new(text: impl Into<Line<'a>>, url: &'a str) -> Self {
         Self {
             text: text.into(),
             url,
@@ -28,29 +37,20 @@ impl<'a> Hyperlink<'a> {
 
 impl Widget for Hyperlink<'_> {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let width = (self.text.width() as u16).min(area.width);
-        if width == 0 {
-            return;
-        }
-        buf.set_span(area.x, area.y, &self.text, width);
+        let rendered = self.text.to_string();
+        self.text.render(area, buf);
 
-        let open = format!("\x1b]8;;{}\x07", self.url);
-        let close = "\x1b]8;;\x07";
-        let last_x = area.x + width - 1;
-
-        if last_x == area.x {
-            if let Some(cell) = buf.cell_mut((area.x, area.y)) {
-                let sym = format!("{open}{}{close}", cell.symbol());
-                cell.set_symbol(&sym);
+        let max_x = area.x + area.width;
+        let chars: Vec<char> = rendered.chars().collect();
+        for (i, pair) in chars.chunks(2).enumerate() {
+            let x = area.x + i as u16 * 2;
+            if x >= max_x {
+                break;
             }
-        } else {
-            if let Some(cell) = buf.cell_mut((area.x, area.y)) {
-                let sym = format!("{open}{}", cell.symbol());
-                cell.set_symbol(&sym);
-            }
-            if let Some(cell) = buf.cell_mut((last_x, area.y)) {
-                let sym = format!("{}{close}", cell.symbol());
-                cell.set_symbol(&sym);
+            let chunk: String = pair.iter().collect();
+            let hyperlink = format!("\x1b]8;;{}\x07{chunk}\x1b]8;;\x07", self.url);
+            if let Some(cell) = buf.cell_mut((x, area.y)) {
+                cell.set_symbol(&hyperlink);
             }
         }
     }
@@ -62,32 +62,39 @@ mod tests {
     use ratatui::{Terminal, backend::TestBackend};
 
     #[test]
-    fn wraps_visible_text_without_shifting_layout() {
+    fn packs_two_visible_chars_per_rewritten_cell() {
         let backend = TestBackend::new(30, 1);
         let mut term = Terminal::new(backend).unwrap();
         term.draw(|f| {
             let area = Rect::new(0, 0, 25, 1);
-            f.render_widget(
-                Hyperlink::new("github.com/aicheye", "https://github.com/aicheye"),
-                area,
-            );
+            f.render_widget(Hyperlink::new("github.com", "https://github.com"), area);
         })
         .unwrap();
 
         let buf = term.backend().buffer();
-        let text = "github.com/aicheye";
-        let first = buf.cell((0, 0)).unwrap().symbol();
-        let last = buf
-            .cell((text.chars().count() as u16 - 1, 0))
-            .unwrap()
-            .symbol();
+        // Even cells (0, 2, 4, ...) carry two real chars wrapped in OSC 8 —
+        // this is exactly what gets sent to a real terminal.
+        assert_eq!(
+            buf.cell((0, 0)).unwrap().symbol(),
+            "\x1b]8;;https://github.com\x07gi\x1b]8;;\x07"
+        );
+        assert_eq!(
+            buf.cell((2, 0)).unwrap().symbol(),
+            "\x1b]8;;https://github.com\x07th\x1b]8;;\x07"
+        );
+        // "github.com" is 10 chars -> 5 pairs; the last covers "o","m".
+        assert_eq!(
+            buf.cell((8, 0)).unwrap().symbol(),
+            "\x1b]8;;https://github.com\x07om\x1b]8;;\x07"
+        );
 
-        assert!(first.starts_with("\x1b]8;;https://github.com/aicheye\x07g"));
-        assert_eq!(last, "e\x1b]8;;\x07");
+        // Odd cells are never sent by Buffer::diff (the preceding wide cell
+        // covers them), so they stay at TestBackend's initial blank state —
+        // that's the mechanism this widget relies on, not a bug.
+        assert_eq!(buf.cell((1, 0)).unwrap().symbol(), " ");
 
-        // The cell right after the visible text must be untouched (still a
-        // plain space), proving the widget didn't widen past its real width.
-        let after = buf.cell((text.chars().count() as u16, 0)).unwrap().symbol();
+        // Nothing past the visible text was touched.
+        let after = buf.cell((10, 0)).unwrap().symbol();
         assert_eq!(after, " ");
     }
 }
