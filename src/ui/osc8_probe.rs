@@ -47,13 +47,7 @@ impl Emu {
         Self {
             w,
             h,
-            grid: vec![
-                EmuCell {
-                    ch: ' ',
-                    url: None
-                };
-                w * h
-            ],
+            grid: vec![EmuCell { ch: ' ', url: None }; w * h],
             cx: 0,
             cy: 0,
             url: None,
@@ -74,10 +68,8 @@ impl Emu {
                             if p.is_ascii_alphabetic() {
                                 if p == 'H' {
                                     let mut it = params.split(';');
-                                    let row: usize =
-                                        it.next().unwrap_or("1").parse().unwrap_or(1);
-                                    let col: usize =
-                                        it.next().unwrap_or("1").parse().unwrap_or(1);
+                                    let row: usize = it.next().unwrap_or("1").parse().unwrap_or(1);
+                                    let col: usize = it.next().unwrap_or("1").parse().unwrap_or(1);
                                     self.cy = row.saturating_sub(1);
                                     self.cx = col.saturating_sub(1);
                                 }
@@ -234,24 +226,22 @@ mod tests {
         let mut emu = Emu::new(W as usize, H as usize);
 
         let mut frame_no = 0;
-        let mut draw = |term: &mut Terminal<CrosstermBackend<Sink>>,
-                        app: &App,
-                        emu: &mut Emu,
-                        label: &str| {
-            term.draw(|f| crate::ui::render(f, app)).unwrap();
-            let bytes = std::mem::take(&mut *sink.0.lock().unwrap());
-            emu.feed(&bytes);
-            frame_no += 1;
-            let label = format!("frame {frame_no}: {label}");
-            dump_frame(&label, emu);
-            assert_runs_clean(&label, emu);
-            if std::env::var("DUMP_BYTES").is_ok() {
-                let pretty = String::from_utf8_lossy(&bytes)
-                    .replace('\x1b', "\n\\e")
-                    .replace('\x07', "<BEL>");
-                println!("--- raw frame {frame_no} ({label}) ---{pretty}\n--- end ---");
-            }
-        };
+        let mut draw =
+            |term: &mut Terminal<CrosstermBackend<Sink>>, app: &App, emu: &mut Emu, label: &str| {
+                term.draw(|f| crate::ui::render(f, app)).unwrap();
+                let bytes = std::mem::take(&mut *sink.0.lock().unwrap());
+                emu.feed(&bytes);
+                frame_no += 1;
+                let label = format!("frame {frame_no}: {label}");
+                dump_frame(&label, emu);
+                assert_runs_clean(&label, emu);
+                if std::env::var("DUMP_BYTES").is_ok() {
+                    let pretty = String::from_utf8_lossy(&bytes)
+                        .replace('\x1b', "\n\\e")
+                        .replace('\x07', "<BEL>");
+                    println!("--- raw frame {frame_no} ({label}) ---{pretty}\n--- end ---");
+                }
+            };
 
         draw(&mut term, &app, &mut emu, "home, first draw");
         draw(&mut term, &app, &mut emu, "home, redraw");
