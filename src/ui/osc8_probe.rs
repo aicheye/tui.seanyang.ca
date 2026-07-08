@@ -206,6 +206,17 @@ mod tests {
                     "{label}: link run at row {y} (url={url}) runs to the screen edge"
                 );
                 assert!(!id.is_empty(), "{label}: link at row {y} has no OSC 8 id");
+                // The no-break-space guard must follow every link so
+                // terminal-side URL matchers (e.g. Ghostty's default
+                // path regex) can't extend their match into the trailing
+                // blanks and underline to the row edge on hover.
+                let guard = &emu.grid[y * emu.w + x1 + 1];
+                assert!(
+                    guard.ch == '\u{a0}' && guard.url.is_none(),
+                    "{label}: cell after link run at row {y} (url={url}) \
+                     should be the NBSP guard, got {:?}",
+                    guard.ch
+                );
             }
         }
     }

@@ -60,6 +60,21 @@ impl Widget for Hyperlink<'_> {
                 cell.set_skip(true);
             }
         }
+
+        // Ghostty's default Ctrl/Cmd-hover URL matcher folds the trailing
+        // blank run into its match when URL-ish text is the last thing on
+        // the row (its path regex branches end with `(?: +(?= *$))?`),
+        // underlining from the link to the row edge. A no-break space right
+        // after the link renders as the same blank but is neither a space
+        // nor a path character, so the match stops at the link text. When
+        // the link fills its area the guard lands one cell outside it —
+        // that cell is blank margin in every current layout, the write is
+        // bounds-checked, and cells holding real content are left alone.
+        if let Some(cell) = buf.cell_mut((area.x.saturating_add(width), area.y))
+            && cell.symbol() == " "
+        {
+            cell.set_symbol("\u{a0}");
+        }
     }
 }
 
@@ -104,10 +119,28 @@ mod tests {
             assert!(cell.skip, "cell {x} should be skipped");
         }
 
-        // Nothing past the visible text was touched.
+        // The cell after the link holds the no-break-space guard that stops
+        // terminal-side URL matchers from running into the trailing blanks.
         let after = buf.cell((10, 0)).unwrap();
         assert!(!after.skip);
-        assert_eq!(after.symbol(), " ");
+        assert_eq!(after.symbol(), "\u{a0}");
+
+        // Cells past the guard stay untouched.
+        let past = buf.cell((11, 0)).unwrap();
+        assert!(!past.skip);
+        assert_eq!(past.symbol(), " ");
+    }
+
+    #[test]
+    fn guard_never_clobbers_real_content() {
+        let mut buf = Buffer::empty(Rect::new(0, 0, 30, 1));
+        buf.set_string(10, 0, "x", ratatui::style::Style::default());
+        let area = Rect::new(0, 0, 10, 1);
+        Hyperlink::new("github.com", "https://github.com").render(area, &mut buf);
+
+        // "github.com" fills the area, so the guard cell falls just past it;
+        // it must not overwrite the neighbouring content.
+        assert_eq!(buf.cell((10, 0)).unwrap().symbol(), "x");
     }
 
     #[test]
@@ -124,7 +157,9 @@ mod tests {
         for x in 1..6u16 {
             assert!(buf.cell((x, 0)).unwrap().skip);
         }
-        assert!(!buf.cell((6, 0)).unwrap().skip);
+        let after = buf.cell((6, 0)).unwrap();
+        assert!(!after.skip);
+        assert_eq!(after.symbol(), "\u{a0}");
     }
 
     #[test]
@@ -152,10 +187,12 @@ mod tests {
 
         let updates = prev.diff(&next);
         for x in 29..37u16 {
+            // x = 29 holds the no-break-space guard; the rest are blanks.
+            let expected = if x == 29 { "\u{a0}" } else { " " };
             assert!(
                 updates
                     .iter()
-                    .any(|(ux, _, cell)| *ux == x && cell.symbol() == " "),
+                    .any(|(ux, _, cell)| *ux == x && cell.symbol() == expected),
                 "stale cell {x} after the link should be cleared"
             );
         }
