@@ -148,7 +148,7 @@ fn render_footer(f: &mut Frame, area: Rect) {
     let key = Style::default()
         .fg(theme::PRIMARY)
         .add_modifier(Modifier::BOLD);
-    let label = Style::default().fg(theme::HI);
+    let label = Style::default().fg(theme::MUTED);
 
     // "<q> quit" = 8 chars
     let bar_width: u16 = 8;
