@@ -7,9 +7,6 @@ ssh seanyang.ca
 ssh tui.seanyang.ca
 ```
 
-The previous domain still answers during the migration: `ssh seanyang.me` and
-`ssh tui.seanyang.me` reach the same server.
-
 <img width="920" height="664" alt="image" src="https://github.com/user-attachments/assets/3315f01f-383a-4104-99ca-676e722884d7" />
 
 ## Deployment
@@ -21,8 +18,7 @@ The idea: move your real SSH daemon to a non-standard port, then give port 22 to
 ### Prerequisites
 
 - A machine with [Docker](https://docs.docker.com/get-docker/) installed
-- An A record for `tui.seanyang.ca` pointing to the machine's public IP (plus
-  one for `tui.seanyang.me` for as long as the old domain is kept alive)
+- An A record for `tui.seanyang.ca` pointing to the machine's public IP
 - Port 22 forwarded to the machine on your router
 
 ### 1. Move Your SSH Daemon Off Port 22
@@ -60,8 +56,8 @@ Now `ssh home` connects to your real shell.
 ### 2. Start the Container
 
 ```bash
-git clone https://github.com/aicheye/tui.seanyang.me.git
-cd tui.seanyang.me
+git clone https://github.com/aicheye/tui.seanyang.ca.git
+cd tui.seanyang.ca
 docker compose up -d --build
 ```
 
@@ -89,7 +85,7 @@ All configuration is done via environment variables:
 |---|---|---|
 | `SSH_ADDR` | `0.0.0.0:2222` | Address and port the SSH server binds to inside the container |
 | `SSH_HOST_KEY` | `/data/host_key` | Path to the Ed25519 host key (auto-generated on first run) |
-| `SITE_DATA_URL` | `https://cdn.jsdelivr.net/gh/aicheye/seanyang.me@main/public/data` | Base URL the content (jobs, projects, quotes, socials, adjectives) is fetched from |
+| `SITE_DATA_URL` | `https://cdn.jsdelivr.net/gh/aicheye/seanyang.ca@main/public/data` | Base URL the content (jobs, projects, quotes, socials, adjectives) is fetched from |
 | `RUST_LOG` | `info` | Log level filter (`trace`, `debug`, `info`, `warn`, `error`) |
 
 ### Content
@@ -113,12 +109,12 @@ The host key lives at `/data/host_key` inside the container. The volume mount (`
 
 ## Host Deployment (without Docker)
 
-Download the latest binary from [GitHub Releases](https://github.com/aicheye/tui.seanyang.me/releases):
+Download the latest binary from [GitHub Releases](https://github.com/aicheye/tui.seanyang.ca/releases):
 
 ```bash
-TAG=$(curl -fsSL https://api.github.com/repos/aicheye/tui.seanyang.me/releases/latest \
+TAG=$(curl -fsSL https://api.github.com/repos/aicheye/tui.seanyang.ca/releases/latest \
   | grep '"tag_name"' | head -1 | cut -d'"' -f4)
-curl -fsSL "https://github.com/aicheye/tui.seanyang.me/releases/download/${TAG}/tui-seanyang-ca-linux-x64.zip" \
+curl -fsSL "https://github.com/aicheye/tui.seanyang.ca/releases/download/${TAG}/tui-seanyang-ca-linux-x64.zip" \
   -o tui-seanyang-ca.zip
 unzip tui-seanyang-ca.zip
 chmod +x tui-seanyang-ca
