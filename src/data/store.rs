@@ -24,11 +24,7 @@ const MIN_REFRESH_INTERVAL_SECS: u64 = 60;
 /// Served from jsDelivr (the same `public/data/*.json` files committed to the
 /// website repo) rather than `seanyang.ca` directly, since the site sits behind
 /// Vercel's bot challenge which blocks non-browser clients.
-///
-/// The `aicheye/seanyang.me` in the path is the GitHub repository name, not the
-/// site's domain — it is unaffected by the .me → .ca domain migration and must
-/// only change if the repository itself is renamed.
-const DEFAULT_BASE_URL: &str = "https://cdn.jsdelivr.net/gh/aicheye/seanyang.me@main/public/data";
+const DEFAULT_BASE_URL: &str = "https://cdn.jsdelivr.net/gh/aicheye/seanyang.ca@main/public/data";
 
 /// Per-request timeout for data fetches.
 const FETCH_TIMEOUT_SECS: u64 = 10;
