@@ -36,7 +36,8 @@ RUN useradd -r -s /sbin/nologin appuser && \
     mkdir -p /data && \
     chown appuser:appuser /data
 
-ENV SSH_ADDR=0.0.0.0:2222
+ENV SSH_PORT=2222
+ENV SSH_HOST_KEY=/data/host_key
 ENV RUST_LOG=info
 
 EXPOSE 2222
