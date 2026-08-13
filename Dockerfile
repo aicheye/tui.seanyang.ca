@@ -11,7 +11,7 @@ RUN apt-get update && \
 # build, so this layer (and everything below it) is invalidated whenever a new
 # release is published -- making `--build` actually pick up new releases instead
 # of reusing the cached download layer.
-ADD https://api.github.com/repos/aicheye/tui.seanyang.me/releases/latest /tmp/release.json
+ADD https://api.github.com/repos/aicheye/tui.seanyang.ca/releases/latest /tmp/release.json
 
 # Map Docker TARGETARCH to release asset names, resolve latest tag if needed
 RUN case "${TARGETARCH}" in \
@@ -24,7 +24,7 @@ RUN case "${TARGETARCH}" in \
     TAG=$(grep '"tag_name"' /tmp/release.json | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/'); \
     echo "Resolved latest -> ${TAG}"; \
     fi && \
-    BASE="https://github.com/aicheye/tui.seanyang.me/releases/download/${TAG}" && \
+    BASE="https://github.com/aicheye/tui.seanyang.ca/releases/download/${TAG}" && \
     curl -fsSL "${BASE}/${ASSET}.zip" -o "/tmp/${ASSET}.zip" && \
     curl -fsSL "${BASE}/sha256sums.txt" -o /tmp/sha256sums.txt && \
     cd /tmp && grep "^[a-f0-9]*  ${ASSET}.zip$" sha256sums.txt | sha256sum --check && \
