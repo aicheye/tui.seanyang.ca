@@ -23,9 +23,9 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04
-            asset_name: tui-seanyang-me-linux-x64
+            asset_name: tui-seanyang-ca-linux-x64
           - os: ubuntu-22.04-arm
-            asset_name: tui-seanyang-me-linux-arm64
+            asset_name: tui-seanyang-ca-linux-arm64
 
     runs-on: ${{ matrix.os }}
 
@@ -38,13 +38,13 @@ jobs:
       shell: bash
       run: |
         cd target/release
-        7z a ${{ matrix.asset_name }}.zip tui-seanyang-me
+        7z a ${{ matrix.asset_name }}.zip tui-seanyang-ca
     - name: Archive binary (Unix)
       if: contains(matrix.os, 'windows') == false
       shell: bash
       run: |
         cd target/release
-        zip ${{ matrix.asset_name }}.zip tui-seanyang-me
+        zip ${{ matrix.asset_name }}.zip tui-seanyang-ca
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -59,7 +59,7 @@ jobs:
     - name: Download Artifacts
       uses: actions/download-artifact@v4
       with:
-        pattern: tui-seanyang-me-*
+        pattern: tui-seanyang-ca-*
         path: artifacts
         merge-multiple: true
 

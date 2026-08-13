@@ -124,7 +124,11 @@ pub fn refresh_if_stale() {
 /// concurrently.
 async fn fetch_all(base: String) -> anyhow::Result<SiteData> {
     let client = reqwest::Client::builder()
-        .user_agent(concat!("tui-seanyang-me/", env!("CARGO_PKG_VERSION")))
+        .user_agent(concat!(
+            env!("CARGO_PKG_NAME"),
+            "/",
+            env!("CARGO_PKG_VERSION")
+        ))
         .timeout(Duration::from_secs(FETCH_TIMEOUT_SECS))
         .build()?;
     let base = base.trim_end_matches('/').to_string();

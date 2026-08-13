@@ -116,15 +116,22 @@ The host key lives at `/data/host_key` inside the container. The volume mount (`
 Download the latest binary from [GitHub Releases](https://github.com/aicheye/tui.seanyang.me/releases):
 
 ```bash
-curl -fsSL https://github.com/aicheye/tui.seanyang.me/releases/download/v0.1.7/tui-seanyang-me-linux-x64.zip \
-  -o tui-seanyang-me.zip
-unzip tui-seanyang-me.zip
-chmod +x tui-seanyang-me
+TAG=$(curl -fsSL https://api.github.com/repos/aicheye/tui.seanyang.me/releases/latest \
+  | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+curl -fsSL "https://github.com/aicheye/tui.seanyang.me/releases/download/${TAG}/tui-seanyang-ca-linux-x64.zip" \
+  -o tui-seanyang-ca.zip
+unzip tui-seanyang-ca.zip
+chmod +x tui-seanyang-ca
 ```
+
+> [!NOTE]
+> Assets are named `tui-seanyang-ca-*` from the first release cut after the
+> rename. Releases published before it carry `tui-seanyang-me-*` — pin a tag
+> older than that and you need the old name.
 
 ### systemd Service
 
-Create `/etc/systemd/system/tui-seanyang-me.service`:
+Create `/etc/systemd/system/tui-seanyang-ca.service`:
 
 ```ini
 [Unit]
@@ -133,26 +140,26 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/tui-seanyang-me
+ExecStart=/usr/local/bin/tui-seanyang-ca
 Environment=SSH_ADDR=0.0.0.0:22
-Environment=SSH_HOST_KEY=/var/lib/tui-seanyang-me/host_key
+Environment=SSH_HOST_KEY=/var/lib/tui-seanyang-ca/host_key
 Environment=RUST_LOG=info
 Restart=on-failure
 RestartSec=5
 
 NoNewPrivileges=true
 ProtectSystem=strict
-ReadWritePaths=/var/lib/tui-seanyang-me
+ReadWritePaths=/var/lib/tui-seanyang-ca
 
 [Install]
 WantedBy=multi-user.target
 ```
 
 ```bash
-sudo mkdir -p /var/lib/tui-seanyang-me
-sudo cp tui-seanyang-me /usr/local/bin/
+sudo mkdir -p /var/lib/tui-seanyang-ca
+sudo cp tui-seanyang-ca /usr/local/bin/
 sudo systemctl daemon-reload
-sudo systemctl enable --now tui-seanyang-me
+sudo systemctl enable --now tui-seanyang-ca
 ```
 
 ---
