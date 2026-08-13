@@ -2,8 +2,8 @@
 name = "tui-seanyang-me"
 version = "3.1.0"
 edition = "2024"
-authors = ["Sean Yang <sean@seanyang.me>"]
-description = "SSH server for seanyang.me"
+authors = ["Sean Yang <sean@seanyang.ca>"]
+description = "SSH server for seanyang.ca"
 license = "MIT"
 repository = "https://github.com/aicheye/tui.seanyang.me"
 

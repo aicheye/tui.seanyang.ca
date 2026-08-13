@@ -50,7 +50,7 @@ pub struct SocialsDoc {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct PrimaryEmail {
-    /// Bare address shown in the TUI, e.g. `sean@seanyang.me`.
+    /// Bare address shown in the TUI, e.g. `sean@seanyang.ca`.
     pub label: String,
 }
 

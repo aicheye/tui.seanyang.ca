@@ -1,4 +1,4 @@
-//! Theme — inspired by seanyang.me's solarized-warm palette.
+//! Theme — inspired by seanyang.ca's solarized-warm palette.
 //!
 //! Palette:
 //!   PRIMARY (orange-red)  — accents, selected items      (#d16d3e, --accent)
