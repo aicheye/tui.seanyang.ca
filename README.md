@@ -1,11 +1,14 @@
-# tui.seanyang.me
+# tui.seanyang.ca
 
 A personal portfolio and introduction, served over SSH as an interactive TUI. Heavily inspired by <https://www.terminal.shop/>
 
 ```bash
-ssh seanyang.me
-ssh tui.seanyang.me
+ssh seanyang.ca
+ssh tui.seanyang.ca
 ```
+
+The previous domain still answers during the migration: `ssh seanyang.me` and
+`ssh tui.seanyang.me` reach the same server.
 
 <img width="920" height="664" alt="image" src="https://github.com/user-attachments/assets/3315f01f-383a-4104-99ca-676e722884d7" />
 
@@ -13,12 +16,13 @@ ssh tui.seanyang.me
 
 This guide covers hosting the TUI on a home server while keeping normal SSH access to the machine.
 
-The idea: move your real SSH daemon to a non-standard port, then give port 22 to the TUI container so that `ssh tui.seanyang.me` connects directly to it.
+The idea: move your real SSH daemon to a non-standard port, then give port 22 to the TUI container so that `ssh tui.seanyang.ca` connects directly to it.
 
 ### Prerequisites
 
 - A machine with [Docker](https://docs.docker.com/get-docker/) installed
-- An A record for `tui.seanyang.me` pointing to the machine's public IP
+- An A record for `tui.seanyang.ca` pointing to the machine's public IP (plus
+  one for `tui.seanyang.me` for as long as the old domain is kept alive)
 - Port 22 forwarded to the machine on your router
 
 ### 1. Move Your SSH Daemon Off Port 22
@@ -46,7 +50,7 @@ To make this convenient, add an entry to `~/.ssh/config` on your local machine:
 
 ```bash
 Host home
-    HostName tui.seanyang.me
+    HostName tui.seanyang.ca
     Port 2200
     User your-username
 ```
@@ -61,7 +65,7 @@ cd tui.seanyang.me
 docker compose up -d --build
 ```
 
-This builds the image and starts the container, mapping host port `22` → container port `2222`, so visitors running `ssh tui.seanyang.me` hit the TUI.
+This builds the image and starts the container, mapping host port `22` → container port `2222`, so visitors running `ssh tui.seanyang.ca` hit the TUI.
 
 ### 3. Verify
 
@@ -69,10 +73,10 @@ From another machine:
 
 ```bash
 # Should open the TUI
-ssh tui.seanyang.me
+ssh tui.seanyang.ca
 
 # Should open your real shell
-ssh -p 2200 tui.seanyang.me
+ssh -p 2200 tui.seanyang.ca
 ```
 
 ---
@@ -93,7 +97,7 @@ All configuration is done via environment variables:
 The page content is pulled at runtime over HTTP from `SITE_DATA_URL`. The
 canonical JSON lives in the website repo under `public/data/` (the single source
 of truth shared with the web frontend); it's served via jsDelivr by default,
-since `seanyang.me` itself sits behind Vercel's bot challenge which blocks
+since `seanyang.ca` itself sits behind Vercel's bot challenge which blocks
 non-browser clients. Content is refreshed on each SSH connection, rate-limited to
 one pull per minute. A bundled snapshot keeps the TUI fully functional if the
 source is unreachable.
@@ -112,43 +116,50 @@ The host key lives at `/data/host_key` inside the container. The volume mount (`
 Download the latest binary from [GitHub Releases](https://github.com/aicheye/tui.seanyang.me/releases):
 
 ```bash
-curl -fsSL https://github.com/aicheye/tui.seanyang.me/releases/download/v0.1.7/tui-seanyang-me-linux-x64.zip \
-  -o tui-seanyang-me.zip
-unzip tui-seanyang-me.zip
-chmod +x tui-seanyang-me
+TAG=$(curl -fsSL https://api.github.com/repos/aicheye/tui.seanyang.me/releases/latest \
+  | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+curl -fsSL "https://github.com/aicheye/tui.seanyang.me/releases/download/${TAG}/tui-seanyang-ca-linux-x64.zip" \
+  -o tui-seanyang-ca.zip
+unzip tui-seanyang-ca.zip
+chmod +x tui-seanyang-ca
 ```
+
+> [!NOTE]
+> Assets are named `tui-seanyang-ca-*` from the first release cut after the
+> rename. Releases published before it carry `tui-seanyang-me-*` — pin a tag
+> older than that and you need the old name.
 
 ### systemd Service
 
-Create `/etc/systemd/system/tui-seanyang-me.service`:
+Create `/etc/systemd/system/tui-seanyang-ca.service`:
 
 ```ini
 [Unit]
-Description=tui.seanyang.me SSH TUI server
+Description=tui.seanyang.ca SSH TUI server
 After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/tui-seanyang-me
+ExecStart=/usr/local/bin/tui-seanyang-ca
 Environment=SSH_ADDR=0.0.0.0:22
-Environment=SSH_HOST_KEY=/var/lib/tui-seanyang-me/host_key
+Environment=SSH_HOST_KEY=/var/lib/tui-seanyang-ca/host_key
 Environment=RUST_LOG=info
 Restart=on-failure
 RestartSec=5
 
 NoNewPrivileges=true
 ProtectSystem=strict
-ReadWritePaths=/var/lib/tui-seanyang-me
+ReadWritePaths=/var/lib/tui-seanyang-ca
 
 [Install]
 WantedBy=multi-user.target
 ```
 
 ```bash
-sudo mkdir -p /var/lib/tui-seanyang-me
-sudo cp tui-seanyang-me /usr/local/bin/
+sudo mkdir -p /var/lib/tui-seanyang-ca
+sudo cp tui-seanyang-ca /usr/local/bin/
 sudo systemctl daemon-reload
-sudo systemctl enable --now tui-seanyang-me
+sudo systemctl enable --now tui-seanyang-ca
 ```
 
 ---

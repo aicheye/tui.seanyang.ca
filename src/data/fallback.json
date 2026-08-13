@@ -124,13 +124,13 @@
     }
   ],
   "primaryEmail": {
-    "label": "sean@seanyang.me"
+    "label": "sean@seanyang.ca"
   },
   "socials": [
     { "label": "GitHub", "url": "https://github.com/aicheye", "handle": "aicheye" },
     { "label": "LinkedIn", "url": "https://linkedin.com/in/syang07", "handle": "syang07" },
     { "label": "Twitter/X", "url": "https://x.com/aicheye", "handle": "aicheye" },
-    { "label": "Bluesky", "url": "https://bsky.app/profile/seanyang.me", "handle": "seanyang.me" },
+    { "label": "Bluesky", "url": "https://bsky.app/profile/seanyang.ca", "handle": "seanyang.ca" },
     { "label": "Instagram", "url": "https://instagram.com/seanyang_esports_gaming", "handle": "seanyang_esports_gaming" },
     { "label": "Spotify", "url": "https://open.spotify.com/user/apexblu", "handle": "aicheye" },
     { "label": "Letterboxd", "url": "https://letterboxd.com/aicheye", "handle": "aicheye" },

@@ -18,6 +18,12 @@ use ratatui::{
 use crate::app::App;
 use hyperlink::Hyperlink;
 
+/// Canonical site domain, shown in the nav border and used to build the
+/// resume link. `seanyang.me` still resolves during the migration, but the
+/// TUI names the new domain so anyone who copies the link out of their
+/// terminal gets the address that will outlive the redirect.
+const SITE_DOMAIN: &str = "seanyang.ca";
+
 /// Top-level render: draws the chrome (nav bar + footer) then delegates to
 /// the active section renderer.
 pub fn render(f: &mut Frame, app: &App) {
@@ -101,7 +107,7 @@ fn render_nav(f: &mut Frame, app: &App, area: Rect) {
         })
         .collect();
 
-    let resume_url = "https://seanyang.me/resume";
+    let resume_url = format!("https://{SITE_DOMAIN}/resume");
     let resume_display = resume_url
         .trim_start_matches("https://")
         .trim_start_matches("http://");
@@ -114,7 +120,7 @@ fn render_nav(f: &mut Frame, app: &App, area: Rect) {
     let block = Block::default()
         .borders(Borders::ALL)
         .border_style(theme::secondary())
-        .title(Span::styled(" seanyang.me ", theme::secondary()));
+        .title(Span::styled(format!(" {SITE_DOMAIN} "), theme::secondary()));
 
     let tabs = Tabs::new(tab_titles)
         .block(block)
@@ -138,7 +144,7 @@ fn render_nav(f: &mut Frame, app: &App, area: Rect) {
                 resume_display,
                 theme::secondary().add_modifier(Modifier::UNDERLINED),
             ),
-            resume_url,
+            &resume_url,
         ),
         Rect::new(link_x, link_area.y, link_w, 1),
     );

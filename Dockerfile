@@ -15,8 +15,8 @@ ADD https://api.github.com/repos/aicheye/tui.seanyang.me/releases/latest /tmp/re
 
 # Map Docker TARGETARCH to release asset names, resolve latest tag if needed
 RUN case "${TARGETARCH}" in \
-    amd64) ASSET="tui-seanyang-me-linux-x64" ;; \
-    arm64) ASSET="tui-seanyang-me-linux-arm64" ;; \
+    amd64) ASSET="tui-seanyang-ca-linux-x64" ;; \
+    arm64) ASSET="tui-seanyang-ca-linux-arm64" ;; \
     *)     echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
     esac && \
     TAG="${VERSION}" && \
@@ -29,7 +29,7 @@ RUN case "${TARGETARCH}" in \
     curl -fsSL "${BASE}/sha256sums.txt" -o /tmp/sha256sums.txt && \
     cd /tmp && grep "^[a-f0-9]*  ${ASSET}.zip$" sha256sums.txt | sha256sum --check && \
     unzip /tmp/${ASSET}.zip -d /usr/local/bin && \
-    chmod +x /usr/local/bin/tui-seanyang-me && \
+    chmod +x /usr/local/bin/tui-seanyang-ca && \
     rm /tmp/${ASSET}.zip /tmp/sha256sums.txt /tmp/release.json
 
 RUN useradd -r -s /sbin/nologin appuser && \
@@ -45,4 +45,4 @@ VOLUME ["/data"]
 
 USER appuser
 
-ENTRYPOINT ["tui-seanyang-me"]
+ENTRYPOINT ["tui-seanyang-ca"]
