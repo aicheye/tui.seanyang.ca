@@ -83,9 +83,9 @@ All configuration is done via environment variables:
 
 | Variable | Default | Description |
 |---|---|---|
-| `SSH_ADDR` | `0.0.0.0:2222` | Address and port the SSH server binds to inside the container |
-| `SSH_HOST_KEY` | `/data/host_key` | Path to the Ed25519 host key (auto-generated on first run) |
-| `SITE_DATA_URL` | `https://cdn.jsdelivr.net/gh/aicheye/seanyang.ca@main/public/data` | Base URL the content (jobs, projects, quotes, socials, adjectives) is fetched from |
+| `SSH_PORT` | `2222` | Port the SSH server binds to (on `0.0.0.0`) inside the container |
+| `SSH_HOST_KEY` | `host_key` | Path to the Ed25519 host key (generated on first run if missing). The Docker image sets this to `/data/host_key` |
+| `SITE_DATA_URL` | `https://cdn.jsdelivr.net/gh/aicheye/seanyang.me@main/public/data` | Base URL the content (jobs, projects, quotes, socials, adjectives) is fetched from. `seanyang.me` here is the GitHub repository name, not the domain |
 | `RUST_LOG` | `info` | Log level filter (`trace`, `debug`, `info`, `warn`, `error`) |
 
 ### Content
@@ -100,7 +100,7 @@ source is unreachable.
 
 ### Persisting the Host Key
 
-The host key lives at `/data/host_key` inside the container. The volume mount (`-v ssh-host-key:/data`) ensures it survives container restarts.
+The host key lives at `/data/host_key` inside the container. It is generated automatically on first start if the file does not exist, and the volume mount (`-v ssh-host-key:/data`) ensures it survives container restarts.
 
 > [!IMPORTANT]
 > If the host key changes, returning visitors will see an SSH host key mismatch warning.
