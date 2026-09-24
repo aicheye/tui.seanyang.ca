@@ -5,6 +5,7 @@ pub mod links;
 #[cfg(test)]
 mod osc8_probe;
 pub mod projects;
+mod scroll;
 pub mod theme;
 
 use ratatui::{
@@ -46,13 +47,14 @@ pub fn render(f: &mut Frame, app: &App) {
         .constraints([
             Constraint::Length(3), // nav bar (tabs + border)
             Constraint::Min(1),    // section content
+            Constraint::Length(1), // gap above footer
             Constraint::Length(1), // footer
         ])
         .split(padded);
 
     render_nav(f, app, chunks[0]);
     app.sections[app.active].render(f, chunks[1]);
-    render_footer(f, chunks[2]);
+    render_footer(f, chunks[3], app.sections[app.active].scrollable());
 }
 
 // ---------------------------------------------------------------------------
@@ -150,20 +152,28 @@ fn render_nav(f: &mut Frame, app: &App, area: Rect) {
     );
 }
 
-fn render_footer(f: &mut Frame, area: Rect) {
+/// Footer: credit on the left, key hints on the right. The scroll hint only
+/// appears when the active section has content outside the viewport.
+fn render_footer(f: &mut Frame, area: Rect, scrollable: bool) {
     let key = Style::default()
         .fg(theme::PRIMARY)
         .add_modifier(Modifier::BOLD);
     let label = Style::default().fg(theme::MUTED);
 
-    // "<q> quit" = 8 chars
-    let bar_width: u16 = 8;
+    let mut hints = Vec::new();
+    if scrollable {
+        hints.push(Span::styled("<↑↓>", key));
+        hints.push(Span::styled(" scroll   ", label));
+    }
+    hints.push(Span::styled("<q>", key));
+    hints.push(Span::styled(" quit", label));
+    let hints = Line::from(hints);
 
     let cols = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
             Constraint::Fill(1),
-            Constraint::Length(bar_width.min(area.width)),
+            Constraint::Length((hints.width() as u16).min(area.width)),
         ])
         .split(area);
 
@@ -172,8 +182,5 @@ fn render_footer(f: &mut Frame, area: Rect) {
         theme::secondary(),
     )]);
     f.render_widget(Paragraph::new(made_with), cols[0]);
-
-    let text = Line::from(vec![Span::styled("<q>", key), Span::styled(" quit", label)]);
-    let footer = Paragraph::new(text).style(Style::default());
-    f.render_widget(footer, cols[1]);
+    f.render_widget(Paragraph::new(hints), cols[1]);
 }

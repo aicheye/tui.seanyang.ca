@@ -13,5 +13,5 @@ mod fallback;
 mod model;
 mod store;
 
-pub use model::{Project, SiteData, Social};
+pub use model::{Job, Project, SiteData, Social};
 pub use store::{init, refresh_if_stale, snapshot};

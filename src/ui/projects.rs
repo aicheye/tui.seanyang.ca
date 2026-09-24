@@ -1,31 +1,45 @@
 use ratatui::{
     Frame,
+    buffer::Buffer,
     layout::{Constraint, Direction, Layout, Rect},
     style::{Modifier, Style},
     text::{Line, Span},
-    widgets::Paragraph,
+    widgets::{Paragraph, Widget},
 };
 
-use super::{hyperlink::Hyperlink, theme};
+use super::{hyperlink::Hyperlink, scroll::Scroll, theme};
 use crate::{
     data::{Project, snapshot},
+    input::Key,
     section::SectionView,
 };
 
 const COLS: usize = 2;
 const CARD_H: u16 = 5; // 4 content lines + 1 padding
 
-pub struct ProjectsSection;
+pub struct ProjectsSection {
+    scroll: Scroll,
+}
 
 impl ProjectsSection {
     pub fn new() -> Self {
-        Self
+        Self {
+            scroll: Scroll::default(),
+        }
     }
 }
 
 impl SectionView for ProjectsSection {
     fn label(&self) -> &'static str {
         "Projects"
+    }
+
+    fn handle_key(&mut self, key: Key) {
+        self.scroll.handle_key(&key);
+    }
+
+    fn scrollable(&self) -> bool {
+        self.scroll.scrollable()
     }
 
     fn render(&self, f: &mut Frame, area: Rect) {
@@ -37,13 +51,17 @@ impl SectionView for ProjectsSection {
             ])
             .split(area);
 
-        render_grid(f, rows[1]);
+        let data = snapshot();
+        let projects = &data.projects;
+        // The last row needs no padding line below it.
+        let height = (projects.len().div_ceil(COLS) as u16 * CARD_H).saturating_sub(1);
+        self.scroll.render(f, rows[1], height, |buf, area| {
+            render_grid(buf, area, projects)
+        });
     }
 }
 
-fn render_grid(f: &mut Frame, area: Rect) {
-    let data = snapshot();
-    let projects = &data.projects;
+fn render_grid(buf: &mut Buffer, area: Rect, projects: &[Project]) {
     let row_count = projects.len().div_ceil(COLS);
 
     let mut v_constraints = vec![];
@@ -69,12 +87,12 @@ fn render_grid(f: &mut Frame, area: Rect) {
             .split(row_area);
 
         for (col_idx, project) in chunk.iter().enumerate() {
-            render_card(f, project, h_cols[col_idx * 2]);
+            render_card(buf, project, h_cols[col_idx * 2]);
         }
     }
 }
 
-fn render_card(f: &mut Frame, p: &Project, area: Rect) {
+fn render_card(buf: &mut Buffer, p: &Project, area: Rect) {
     let tech_str = p.technologies.join(" · ");
     let url = p.github.as_deref().map(|u| u.trim_end_matches('/'));
 
@@ -83,7 +101,7 @@ fn render_card(f: &mut Frame, p: &Project, area: Rect) {
         Line::from(vec![Span::styled(p.description.clone(), theme::body())]),
         Line::from(vec![Span::styled(tech_str, theme::secondary())]),
     ];
-    f.render_widget(Paragraph::new(lines), area);
+    Paragraph::new(lines).render(area, buf);
 
     if let Some(url) = url {
         let display = url
@@ -92,9 +110,7 @@ fn render_card(f: &mut Frame, p: &Project, area: Rect) {
         let style = Style::default()
             .fg(theme::MUTED)
             .add_modifier(Modifier::UNDERLINED);
-        f.render_widget(
-            Hyperlink::new(Span::styled(display, style), url),
-            Rect::new(area.x, area.y + 3, area.width, 1),
-        );
+        Hyperlink::new(Span::styled(display, style), url)
+            .render(Rect::new(area.x, area.y + 3, area.width, 1), buf);
     }
 }

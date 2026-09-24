@@ -98,6 +98,7 @@ impl SectionView for HomeSection {
 
     fn render(&self, f: &mut Frame, area: Rect) {
         let data = snapshot();
+        let quote = quote_lines(self, &data, area.width);
 
         let chunks = Layout::default()
             .direction(Direction::Vertical)
@@ -109,8 +110,9 @@ impl SectionView for HomeSection {
                 Constraint::Length(1),                               // tagline
                 Constraint::Length(1),                               // spacer
                 Constraint::Length(2),                               // progress bar
-                Constraint::Min(2),                                  // gap
-                Constraint::Length(6),                               // quote
+                Constraint::Length(2),                               // gap
+                Constraint::Length(quote.len() as u16),              // quote
+                Constraint::Fill(1),                                 // room for longer quotes
             ])
             .split(area);
 
@@ -118,7 +120,7 @@ impl SectionView for HomeSection {
         render_location(f, chunks[2], &data.primary_email.label, &data.location);
         render_tagline(f, chunks[4], &data.adjectives);
         render_progress(f, chunks[6]);
-        render_quote(f, self, &data, chunks[8]);
+        f.render_widget(Paragraph::new(quote), chunks[8]);
     }
 }
 
@@ -223,9 +225,11 @@ fn render_progress(f: &mut Frame, area: Rect) {
     f.render_widget(Paragraph::new(vec![label, bar]), area);
 }
 
-fn render_quote(f: &mut Frame, section: &HomeSection, data: &SiteData, area: Rect) {
+/// The quote block: the wrapped quote, a blank line, and the attribution,
+/// each prefixed with a │. Empty when there are no quotes.
+fn quote_lines(section: &HomeSection, data: &SiteData, width: u16) -> Vec<Line<'static>> {
     if data.quotes.is_empty() {
-        return;
+        return Vec::new();
     }
     let idx = section.order.get(section.cursor).copied().unwrap_or(0) % data.quotes.len();
     let quote = &data.quotes[idx];
@@ -234,14 +238,14 @@ fn render_quote(f: &mut Frame, section: &HomeSection, data: &SiteData, area: Rec
 
     // Manual word-wrap so every visual line gets its own │ prefix.
     let prefix_w = 3usize; // "│  "
-    let content_w = (area.width as usize).saturating_sub(prefix_w);
+    let content_w = (width as usize).saturating_sub(prefix_w);
     let full_text = format!("\"{}\"", quote.text);
     let wrapped = word_wrap(&full_text, content_w);
 
     let quote_style = Style::default()
         .fg(theme::HI)
         .add_modifier(Modifier::ITALIC);
-    let mut tui_lines: Vec<Line> = wrapped
+    let mut tui_lines: Vec<Line<'static>> = wrapped
         .into_iter()
         .map(|chunk| {
             Line::from(vec![
@@ -263,7 +267,7 @@ fn render_quote(f: &mut Frame, section: &HomeSection, data: &SiteData, area: Rec
         Span::styled(" prev/next", theme::secondary()),
     ]));
 
-    f.render_widget(Paragraph::new(tui_lines), area);
+    tui_lines
 }
 
 /// Word-wrap `text` so no line exceeds `max_width` display columns.

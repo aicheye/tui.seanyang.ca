@@ -16,6 +16,12 @@ pub trait SectionView: Send {
     /// Render this section into the given area.
     fn render(&self, f: &mut Frame, area: Rect);
 
+    /// True when the section has content outside the viewport, so the footer
+    /// shows the scroll keys. Valid after `render`.
+    fn scrollable(&self) -> bool {
+        false
+    }
+
     /// Optional periodic update logic.
     fn update(&mut self) {
         // No periodic update logic needed by default.
