@@ -62,21 +62,14 @@ impl SectionView for ProjectsSection {
 }
 
 fn render_grid(buf: &mut Buffer, area: Rect, projects: &[Project]) {
-    let row_count = projects.len().div_ceil(COLS);
-
-    let mut v_constraints = vec![];
-    for _ in 0..row_count {
-        v_constraints.push(Constraint::Length(CARD_H));
-    }
-    v_constraints.push(Constraint::Fill(1));
-
-    let v_rows = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints(v_constraints)
-        .split(area);
-
+    // Rows sit at fixed offsets. A Layout of Length(CARD_H) rows would shrink an
+    // arbitrary row when the area is one line short of the last row's padding.
     for (row_idx, chunk) in projects.chunks(COLS).enumerate() {
-        let row_area = v_rows[row_idx];
+        let y = area.y + row_idx as u16 * CARD_H;
+        if y >= area.bottom() {
+            break;
+        }
+        let row_area = Rect::new(area.x, y, area.width, CARD_H.min(area.bottom() - y));
         let h_cols = Layout::default()
             .direction(Direction::Horizontal)
             .constraints([
